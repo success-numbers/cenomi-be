@@ -5,13 +5,13 @@ exports.handler = async (event) => {
     try {
         const body = JSON.parse(event.body);
         console.log("this is body", body);
-        transferId= body.transferId;
+        transferSeqId= body.transferSeqId;
         userId= body.userId;
         const params = {
             TableName: process.env.tableName, 
             Key: {
-                'PK': `HEAD#${transferId}`,
-                'SK': `HEAD#${transferId}`
+                'PK': `HEAD#${transferSeqId}`,
+                'SK': `HEAD#${transferSeqId}`
             }
         };
         console.log(params);
@@ -21,8 +21,8 @@ exports.handler = async (event) => {
             const updateParams = {
                 TableName: process.env.tableName, 
                 Key: {
-                    'PK': `HEAD#${transferId}`,
-                    'SK': `HEAD#${transferId}`
+                    'PK': `HEAD#${transferSeqId}`,
+                    'SK': `HEAD#${transferSeqId}`
                 },
                 UpdateExpression: 'SET #status = :newStatus',
                 ExpressionAttributeNames: {
@@ -53,7 +53,7 @@ exports.handler = async (event) => {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify({ "message": "Invalid request or status is not INPROGRESS" }),
+            body: JSON.stringify({ "message": "Invalid transferSeqId or status is not INPROGRESS" }),
         };
     } catch (e) {
         console.error('Error updating status:', e.message);

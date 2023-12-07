@@ -3,16 +3,16 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
     try {
-        const transferId = event.queryStringParameters.transferId;
+        const seqId = event.queryStringParameters.seqId;
 
-        if (!transferId) {
+        if (!seqId) {
             const res = {
                 statusCode: 400,
                 headers: {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*',
                 },
-                body: JSON.stringify({ "message": "transferId parameter is missing" }),
+                body: JSON.stringify({ "message": "seqId parameter is missing" }),
             };
             return res;
         }
@@ -21,14 +21,14 @@ exports.handler = async (event) => {
             TableName: process.env.tableName,
             KeyConditionExpression: 'PK = :pkVal',
             ExpressionAttributeValues: {
-                ':pkVal': `DET#${transferId}`,
+                ':pkVal': `DET#${seqId}`,
             },
         };
 
         const result = await dynamoDb.query(params).promise();
         
         const Items = result.Items.map(item => ({
-            itemPK: transferId,
+            itemSeqId: seqId,
             barcode: item.SK,
             timestamp: item.timestamp,
             quantity: item.quantity,
@@ -37,7 +37,7 @@ exports.handler = async (event) => {
         }));
 
         const response = {
-            transferId: transferId,
+            transferSeqId: seqId,
             Items: Items
         };
 
@@ -58,7 +58,7 @@ exports.handler = async (event) => {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify({ "message": "Internal server error" }),
+            body: JSON.stringify({ "message": `Error! ${JSON.stringify(e)}` }),
         };
         return res;
     }

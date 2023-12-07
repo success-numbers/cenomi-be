@@ -6,25 +6,25 @@ exports.handler = async (event) => {
         console.log('Event body:', event);
         const requestBody = JSON.parse(event.body || '{}');
 
-        const { user_id, dest_id, transferId, pickedItems } = requestBody;
+        const { user_id, dest_id, transferSeqId, pickedItems } = requestBody;
 
-        if (!user_id || !dest_id || !transferId || !pickedItems) {
+        if (!user_id || !dest_id || !transferSeqId || !pickedItems) {
             return {
                 statusCode: 400,
                 headers: {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*',
                 },
-                body: JSON.stringify({ "message": "Invalid request parameters" }),
+                body: JSON.stringify({ "message": "Missing mandatory request fields" }),
             };
         }
 
         console.log(pickedItems);
-        const updatePromises = pickedItems.map(async item => {
+        const updatePromises = pickedItems.map(async item => {  
             const params = {
                 TableName: process.env.tableName, 
                 Key: {
-                    'PK': `DET#${transferId}`,
+                    'PK': `DET#${transferSeqId}`,
                     'SK': item.barcode
                 },
                 UpdateExpression: 'SET pickedQuantity = pickedQuantity + :val',
@@ -33,7 +33,7 @@ exports.handler = async (event) => {
                 },
                 ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)'
             };
-            console.log("this is params", params);
+            console.log("Picked Transfer DB Params", JSON.stringify(params));
             return dynamoDb.update(params).promise();
         });
 
@@ -48,14 +48,14 @@ exports.handler = async (event) => {
             body: JSON.stringify({ "message": "Picked items updated successfully" }),
         };
     } catch (e) {
-        console.error('Error picking transfer items:', e.message);
+        console.error('Error picking transfer items:', e.toString());
         return {
             statusCode: 500,
             headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify({ "message": "Internal server error" }),
+            body: JSON.stringify({ "message": `Error! ${JSON.stringify(e)}` }),
         };
     }
 };
