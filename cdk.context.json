@@ -1,0 +1,4 @@
+{
+  "ssm:account=458980468763:parameterName=/CenomiIntegration/DataTableName:region=ap-south-1": "CenomiIntegration-Data",
+  "ssm:account=458980468763:parameterName=/CenomiIntegration/ConfigTableName:region=ap-south-1": "CenomiIntegration-Config"
+}

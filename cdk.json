@@ -56,6 +56,56 @@
     "@aws-cdk/aws-efs:mountTargetOrderInsensitiveLogicalId": true,
     "@aws-cdk/aws-rds:auroraClusterChangeScopeOfInstanceParameterGroupWithEachParameters": true,
     "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": true,
-    "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true
+    "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
+    "sit-config": {
+      "project": {
+        "projectName": "CenomiIntegration",
+        "projectEnvironment": "DEV",
+        "projectVersion": "0.0.1"
+      },
+      "env": {
+        "account": "458980468763",
+        "region": "ap-south-1"
+      },
+      
+      "attributes": {
+        "userPoolId": "ap-south-1_KPCjTku9t",
+        "secretIdWMS": "dev",
+        "simserviceHost": "http://10.240.51.37:10001"
+      },
+      "dynamoDBTables": {
+        "data": "",
+        "Stock": "Stock"
+      },
+      "layers": {
+        "npmLayer": {
+          "name": "NPMPackagesLayer",
+          "version": "2"
+        },
+        "modelsLayer": {
+        }
+      },
+      "vpc": {
+        "retail": "vpc-03b9c564"
+      },
+      "securityGroups" : {
+        "SG": "sg-0666b19beab549604"
+      },
+      "subnets": [{
+        "subnet_id": "subnet-eda0faa4"
+      }],
+      "roles" : {
+        "role_1": "role/cloud9-oms-verifyorderRole-1GVXMF164068H"
+      },
+      "allowCrossOrigins": [
+        "https://d35vw099ooesiq.amplifyapp.com",
+        "https://enhancecl.d35vw099ooesiq.amplifyapp.com",
+        "https://enhance.d35vw099ooesiq.amplifyapp.com",
+        "http://localhost:3000", 
+        "https://sit.d35vw099ooesiq.amplifyapp.com", 
+        "https://uat.dlpnhy99scsgh.amplifyapp.com"
+    ]
+
+    }
   }
 }

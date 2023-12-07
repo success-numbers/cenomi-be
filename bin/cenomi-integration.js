@@ -1,21 +1,47 @@
 #!/usr/bin/env node
 
 const cdk = require('aws-cdk-lib');
-const { CenomiIntegrationStack } = require('../lib/cenomi-integration-stack');
+const { CenomiIntegrationCognitoStack } = require('../lib/cenomi-integration-cognito-stack');
+const { CenomiIntegrationCommonStack } = require('../lib/cenomi-integration-commmon-stack');
+const { CenomiIntegrationDynamoDbStack } = require('../lib/cenomi-integration-dynamodb-stack');
+const { CenomiIntegrationBusinessStack } = require('../lib/cenomi-integration-buisness-stack');
+const { CenomiIntegrationLayersStack } = require('../lib/cenomi-integration-layers-stack');
 
 const app = new cdk.App();
-new CenomiIntegrationStack(app, 'CenomiIntegrationStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+let config = {};
+config = app.node.tryGetContext('sit-config');
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+new CenomiIntegrationCognitoStack(app, 'cenomi-integration-cognito-stack', {
+  resourcePrefix : config.project.projectName
+});
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+new CenomiIntegrationCommonStack(app,'cenomi-integration-common-stack',{
+  resourcePrefix : config.project.projectName,
+  env: config.env,
+  attributes: config.attributes,
+  roles: config.roles,
+  allowCrossOrigins: config.allowCrossOrigins,
+});
+
+new CenomiIntegrationDynamoDbStack(app, 'cenomi-integration-dynamodb-stack',{
+  resourcePrefix : config.project.projectName,
+  env: config.env,
+  attributes: config.attributes,
+  roles: config.roles,
+  allowCrossOrigins: config.allowCrossOrigins,
+});
+new CenomiIntegrationBusinessStack(app, 'cenomi-integration-buisness-stack',{
+  resourcePrefix : config.project.projectName,
+  env: config.env,
+  attributes: config.attributes,
+  roles: config.roles,
+  allowCrossOrigins: config.allowCrossOrigins,
+  layersData:config.layers,
+  runtime: cdk.aws_lambda.Runtime.NODEJS_18_X
+});
+new CenomiIntegrationLayersStack(app,'cenomi-integration-layers-stack',{
+  resourcePrefix : config.project.projectName,
+  layersData: config.layers,
+  env: config.env
 });
