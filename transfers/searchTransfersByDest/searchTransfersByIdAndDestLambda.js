@@ -28,7 +28,7 @@ async function getTransferDetails(transferId) {
 
 exports.handler = async (event) => {
     try {
-        const transferId = event.queryStringParameters.transferId;
+        const transferId = event.queryStringParameters.transferSeqId;
         const destLocId = event.queryStringParameters.destLocId;
 
         if (!transferId || !destLocId) {
@@ -38,7 +38,7 @@ exports.handler = async (event) => {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*',
                 },
-                body: JSON.stringify({ "message": "transferId or destLocId parameter is missing" }),
+                body: JSON.stringify({ "message": "transferSeqId or destLocId parameter is missing" }),
             };
             return res;
         }
@@ -58,10 +58,13 @@ exports.handler = async (event) => {
         }
 
         const response = {
-            transferId: transferId,
+            transferSeqId: transferId,
             destLocId: destLocId,
-            timestamp: transferDetails.timestamp,
-            status: transferDetails.status
+            status: transferDetails.status,
+            fromStore: transferDetails['fromStore'],
+            fromStoreName: transferDetails['fromStoreName'],
+            docNo: transferDetails['docNo'],
+            docDate: transferDetails.timestamp,
         };
 
         const res = {

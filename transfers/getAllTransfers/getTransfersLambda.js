@@ -58,6 +58,7 @@ exports.handler = async (event) => {
             transferSeqId: item.PK.split('#')[1], 
             fromStore: item['fromStore'],
             fromStoreName: item['fromStoreName'],
+            docNo: item['docNo'],
             docDate: item.timestamp,
             status: item.status 
         }));
