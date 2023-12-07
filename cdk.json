@@ -60,8 +60,8 @@
     "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
     "sit-config": {
       "project": {
-        "projectName": "CenomiIntegration",
-        "projectEnvironment": "DEV",
+        "projectName": "Cenomi-Integration",
+        "projectEnvironment": "SIT",
         "projectVersion": "0.0.1"
       },
       "env": {
@@ -70,18 +70,23 @@
       },
       
       "attributes": {
-        "userPoolId": "ap-south-1_KPCjTku9t",
-        "secretIdWMS": "dev",
-        "simserviceHost": "http://10.240.51.37:10001"
+        "masterApiGateway": {
+          "stageName": "sit",
+          "masterGatewayName": "Cenomi-BE",
+          "exportApiId": "Master-Api-Id",
+          "exportResourceId": "Master-Resource-Id"
+        }
       },
       "dynamoDBTables": {
-        "data": "",
-        "Stock": "Stock"
+        "InditexDataTable": "Inditex-Data",
+        "FileTransferDataTable": "FileTransfer-Data",
+        "ConfigTable": "Config",
+        "ChunkTable": "ChunkTable"
       },
       "layers": {
         "npmLayer": {
           "name": "NPMPackagesLayer",
-          "version": "2"
+          "version": "1"
         },
         "modelsLayer": {
         }
