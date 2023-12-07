@@ -4,14 +4,14 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event) => {
     try {
         const body = JSON.parse(event.body);
-        const transferId = body.transferId;
+        const transferSeqId = body.transferSeqId;
         const status=body.status;
 
         const params = {
             TableName: process.env.tableName,
             Key: {
-                'PK': `HEAD#${transferId}`,
-                'SK': `HEAD#${transferId}`
+                'PK': `HEAD#${transferSeqId}`,
+                'SK': `HEAD#${transferSeqId}`
             },
             UpdateExpression: 'SET #status = :newStatus',
             ExpressionAttributeNames: {

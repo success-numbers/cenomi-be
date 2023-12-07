@@ -37,7 +37,7 @@ async function getItemsByDestId(destId) {
 
 exports.handler = async (event) => {
     try {
-        const destId = event.queryStringParameters.destId; 
+        const destId = event.queryStringParameters?.destId ?? null; 
         if (!destId) {
             const res = {
                 statusCode: 400,
@@ -45,7 +45,7 @@ exports.handler = async (event) => {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*',
                 },
-                body: JSON.stringify({ "message": "destId parameter is missing" }),
+                body: JSON.stringify({ "message": "destId query param is required" }),
             };
             return res;
         }
@@ -55,8 +55,11 @@ exports.handler = async (event) => {
 
         
         const transfers = headerItems.map(item => ({
-            transferId: item.PK.split('#')[1], 
-            timestamp: item.timestamp,
+            transferSeqId: item.PK.split('#')[1], 
+            fromStore: item['fromStore'],
+            fromStoreName: item['fromStoreName'],
+            docNo: item['docNo'],
+            docDate: item.timestamp,
             status: item.status 
         }));
 
@@ -82,7 +85,7 @@ exports.handler = async (event) => {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify({ "message": "Internal server error" }),
+            body: JSON.stringify({ "message": `Error ${JSON.stringify(e)}` }),
         };
         return res;
     }
