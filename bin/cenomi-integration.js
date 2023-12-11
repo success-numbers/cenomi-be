@@ -20,7 +20,7 @@ if (app.node.tryGetContext("deploy-environment") === "sit") {
 }
 
 const projectResourcesPrefix =
-  config.project.projectName + "-" + config.project.projectEnvironment + "-";
+config.project.projectName + "-" + config.project.projectEnvironment + "-";
 const StackPrefix =
   config.project.projectName.toLowerCase() +
   "-" +
