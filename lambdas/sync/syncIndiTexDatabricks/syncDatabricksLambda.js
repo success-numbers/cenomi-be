@@ -9,13 +9,13 @@ exports.handler = async (event, context) => {
         const databricksToken = 'Bearer dapi403f06fb4fd99ee03377165e3984db86'; // Replace with your Databricks token
 
         const sqlStatement = "select * from fin_recon.cenomi_app.movement where landing_update_timestamp > '2023-09-14T05:59:04.283+0000' and `p:Colour` = 700"; // Your SQL statement
-        const queryPayload = {
+        const queryPayload = {  
             statement: sqlStatement,
             warehouse_id: '7d5e01a202a675ca',
             disposition: 'EXTERNAL_LINKS',
             format: 'JSON_ARRAY',
             byte_limit: 10485760,
-            wait_timeout: '10s'
+            wait_timeout: '0s'
         };
 
         const response = await axios.post(databricksEndpoint, queryPayload, {

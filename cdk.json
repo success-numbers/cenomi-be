@@ -81,7 +81,8 @@
         "InditexDataTable": "Inditex-Data",
         "FileTransferDataTable": "FileTransfer-Data",
         "ConfigTable": "Config",
-        "ChunkTable": "ChunkTable"
+        "ChunkTable": "ChunkTable",
+        "SyncDataTable": "SyncDataTable"
       },
       "layers": {
         "npmLayer": {
