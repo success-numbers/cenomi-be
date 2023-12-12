@@ -19,7 +19,8 @@ async function batchWriteToDynamoDB(tableName, items) {
 
 async function processALLOC(payload, tableName) {
     try {
-        const { fileName, userId, rows } = payload;
+        const createdAt = new Date().toISOString();
+        const { fileName, userId, rows, fileType } = payload;
 
         const existingHeaderItem = await dynamoDb.get({
             TableName: tableName,
@@ -52,15 +53,16 @@ async function processALLOC(payload, tableName) {
         });
 
         await batchWriteToDynamoDB(tableName, items);
-
         await dynamoDb.put({
             TableName: tableName,
             Item: {
                 PK: fileName,
                 SK: `HEAD#${fileName}`,
                 userId,
+                fileType: fileType, 
                 entityType: 'HEADER',
                 status:'OPEN',
+                createdAt: createdAt
             },
         }).promise();
 
@@ -73,7 +75,7 @@ async function processALLOC(payload, tableName) {
 
 async function processGRN(payload, tableName) {
     try {
-        const { fileName, userId, rows } = payload;
+        const { fileName, userId, rows, fileType } = payload;
 
         const existingHeaderItem = await dynamoDb.get({
             TableName: tableName,
@@ -103,7 +105,7 @@ async function processGRN(payload, tableName) {
         });
 
         await batchWriteToDynamoDB(tableName, items);
-
+        const createdAt = new Date().toISOString();
         await dynamoDb.put({
             TableName: tableName,
             Item: {
@@ -112,6 +114,7 @@ async function processGRN(payload, tableName) {
                 userId,
                 entityType: 'HEADER',
                 status:'OPEN',
+                createdAt: createdAt
             },
         }).promise();
 
