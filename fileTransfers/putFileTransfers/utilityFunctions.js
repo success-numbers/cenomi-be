@@ -63,7 +63,7 @@ function validateGSD(payload) {
             if (!payloadFields.includes(field)) {
                 return {
                     isValid: false,
-                    errorMessage: `Field '${field}' is missing in one of the rows for 'GSD'`,
+                    errorMessage: `Field '${field}' is missing in one of the rows for 'DSD'`,
                 };
             }
         }
@@ -71,7 +71,7 @@ function validateGSD(payload) {
         if (payloadFields.length !== requiredFields.length) {
             return {
                 isValid: false,
-                errorMessage: 'Extra or invalid fields found in one of the rows for \'GSD\'',
+                errorMessage: 'Extra or invalid fields found in one of the rows for \'DSD\'',
             };
         }
     }

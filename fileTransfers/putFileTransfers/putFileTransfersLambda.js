@@ -46,7 +46,7 @@ exports.handler = async (event) => {
                     }
                 }
                 break;
-            case 'GSD':
+            case 'DSD':
                 validationResponse = validateGSD(payload);
                 if (validationResponse.isValid) {
                     const processingResponse = await processGSD(payload,tableName);

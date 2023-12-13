@@ -1,8 +1,16 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-
+const utility = require('./utility')
 exports.handler = async (event) => {
     try {
+        console.log("DASHBOARD STATS LAMBDA", JSON.stringify(event));
+        const eventBody = JSON.parse(event.body);
+
+        const { tsf_type, tsf_status, startDate, endDate } = eventBody;
+        const dbResp = await utility.getStatsForSearchCriteria({
+            tsfType: tsf_type , tsfStatus: tsf_status, startDate: startDate, endDate: endDate
+        })
+        
         const mockResponse = {
             "tsf_type": "ALL",
             "tsf_status": "ALL",
@@ -87,7 +95,7 @@ exports.handler = async (event) => {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify(mockResponse),
+            body: JSON.stringify(dbResp),
         };
         return res;
     } catch (e) {

@@ -113,6 +113,7 @@ async function processGRN(payload, tableName) {
                 SK: `HEAD#${fileName}`,
                 userId,
                 entityType: 'HEADER',
+                fileType: fileType, 
                 status:'OPEN',
                 createdAt: createdAt
             },
@@ -126,8 +127,10 @@ async function processGRN(payload, tableName) {
 }
 
 async function processGSD(payload, tableName) {
+    const createdAt = new Date().toISOString();
+
     try {
-        const { fileName, userId, rows } = payload;
+        const { fileName, userId, rows, fileType } = payload;
 
         const existingHeaderItem = await dynamoDb.get({
             TableName: tableName,
@@ -165,6 +168,8 @@ async function processGSD(payload, tableName) {
                 SK: `HEAD#${fileName}`,
                 userId,
                 entityType: 'HEADER',
+                fileType: fileType,
+                createdAt: createdAt,
                 status:'OPEN',
             },
         }).promise();
@@ -178,7 +183,7 @@ async function processGSD(payload, tableName) {
 
 async function processBRI(payload, tableName) {
     try {
-        const { fileName, userId, rows } = payload;
+        const { fileName, userId, rows, fileType } = payload;
 
         // Check if the same header level info exists
         const existingHeaderItem = await dynamoDb.get({
@@ -216,6 +221,7 @@ async function processBRI(payload, tableName) {
                 userId,
                 entityType: 'HEADER',
                 status:'OPEN',
+                fileType: fileType
             },
         }).promise();
 
