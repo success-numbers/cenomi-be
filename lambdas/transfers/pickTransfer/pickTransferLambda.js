@@ -20,22 +20,47 @@ exports.handler = async (event) => {
         }
 
         console.log(pickedItems);
-        const updatePromises = pickedItems.map(async item => {  
+        const updatePromises = pickedItems.map(async item => {
             const params = {
-                TableName: process.env.tableName, 
-                Key: {
-                    'PK': `DET#${transferSeqId}`,
-                    'SK': item.barcode
-                },
-                UpdateExpression: 'SET pickedQuantity = pickedQuantity + :val',
-                ExpressionAttributeValues: {
-                    ':val': item.scannedQuantity,
-                },
-                ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)'
+              TableName: process.env.tableName,
+              Key: {
+                'PK': `DET#${transferSeqId}`,
+                'SK': item.barcode
+              },
+              UpdateExpression: 'SET pickedQuantity = pickedQuantity + :val',
+              ExpressionAttributeValues: {
+                ':val': item.scannedQuantity,
+              },
+              ConditionExpression: 'attribute_exists(PK)',
             };
+          
             console.log("Picked Transfer DB Params", JSON.stringify(params));
-            return dynamoDb.update(params).promise();
-        });
+          
+            try {
+              return await dynamoDb.update(params).promise();
+            } catch (error) {
+              if (error.code === 'ConditionalCheckFailedException') {
+                // Item doesn't exist, so let's add it
+                const addParams = {
+                  TableName: process.env.tableName,
+                  Item: {
+                    'PK': `DET#${transferSeqId}`,
+                    'SK': item.barcode,
+                    'pickedQuantity': item.scannedQuantity,
+                    'quantity': item.quantity,
+                    'timestamp': item.timestamp,
+                    'barcode': item.barcode,
+                    'entityType': 'DETAILS'
+                  }
+                };
+                console.log("Adding item to DynamoDB", JSON.stringify(addParams));
+                return dynamoDb.put(addParams).promise();
+              }
+          
+              throw error;
+            }
+          });
+          
 
         await Promise.all(updatePromises);
 
