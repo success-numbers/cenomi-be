@@ -44,10 +44,11 @@ exports.buildSearchConstraints = (statuses, fileType, startDate, endDate, lastEv
 exports.dbTransformMapper = (items) => {
     const reqdItemsList = items.map((e) => {
         return {
-            "fileName": "File101ALLOC",
+            "fileName": e.PK,
             "entityType": "HEADER",
             "userId": e.userId,
             "status": e.status,
+            "asn": e.asn ?? null,
             "createdAt": e.createdAt,
             "updatedAt": e.updatedAt ?? null
         };

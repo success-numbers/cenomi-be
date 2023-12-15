@@ -1,3 +1,4 @@
  cdk deploy --all --profile default  -c deploy-environment=sits
 
- 
+  cdk deploy  cenomi-integration-sit-buisness-stack --profile default  -c deploy-environment=sit
+
