@@ -1,6 +1,6 @@
 exports.dbTransformMapper = (e) => {
     return {
-        "fileName": "File101ALLOC",
+        "fileName": e.PK,
         "entityType": "HEADER",
         "userId": e.userId,
         "status": e.status,
