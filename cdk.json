@@ -80,6 +80,7 @@
       "dynamoDBTables": {
         "InditexDataTable": "Inditex-Data",
         "FileTransferDataTable": "FileTransfer-Data",
+        "FileTransferSyncTable": "FileTransfer-Sync",
         "ConfigTable": "Config",
         "ChunkTable": "ChunkTable",
         "SyncDataTable": "SyncDataTable"
