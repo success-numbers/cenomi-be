@@ -1,12 +1,15 @@
 const AWS = require("aws-sdk");
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const utility = require('./utility');
+const constants = require('./constants');
+
 exports.handler = async (event) => {
     try {
         const { type, status = "", limit = 100, startDate = null, endDate = null, lastEvaluatedKey = null } = event.queryStringParameters;
 
-        const validFileTypes = ["ALLOC", "GRN", "GSD", "BRI"];
-        const validStatusValues = ["OPEN", "INPROGRESS", "SUBMITTED"];
+        const validFileTypes = ["ALLOC", "GRN", "DSD", "BRI", "ALL"];
+        const validStatusValues = ["OPEN", "INPROGRESS", "SUBMITTED", "ALL"];
+        
 
         if (!validFileTypes.includes(type)) {
             return {
@@ -26,26 +29,59 @@ exports.handler = async (event) => {
             }
         }
 
-        const params = {
-            TableName: process.env.tableName,
-            IndexName: "fileType-createdAt-index",
-            ...utility.buildSearchConstraints(statuses, type, startDate, endDate, lastEvaluatedKey),
-            Limit: limit,
-        };
+        switch(type){
+            case "ALL": {
 
-        const result = await dynamoDb.query(params).promise();
-        let lastUpdatedKey = null;
-        if (result && result.LastEvaluatedKey) {
-            lastUpdatedKey = btoa(JSON.stringify(result.LastEvaluatedKey))
+                const params = {
+                    TableName: process.env.tableName,
+                    ...utility.allTransferQueryHandler(statuses, startDate, endDate, lastEvaluatedKey),
+                    Limit: limit,
+                };
+                const result = await dynamoDb.query(params).promise();
+                let lastUpdatedKey = null;
+                if (result && result.LastEvaluatedKey) {
+                    lastUpdatedKey = btoa(JSON.stringify(result.LastEvaluatedKey))
+                }
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({
+                        fileType: type,
+                        paginationToken: lastUpdatedKey,
+                        transfers: utility.dbTransformMapper(result.Items),
+                        display_name : constants.ColumnMappings
+                    }),
+                };
+            }
+            case "ALLOC":
+            case "GRN":
+            case "DSD":
+            case "BRI":
+                {
+                    const params = {
+                        TableName: process.env.tableName,
+                        IndexName: "fileType-createdAt-index",
+                        ...utility.buildSearchConstraints(statuses, type, startDate, endDate, lastEvaluatedKey),
+                        Limit: limit,
+                    };
+            
+                    const result = await dynamoDb.query(params).promise();
+                    let lastUpdatedKey = null;
+                    if (result && result.LastEvaluatedKey) {
+                        lastUpdatedKey = btoa(JSON.stringify(result.LastEvaluatedKey))
+                    }
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify({
+                            fileType: type,
+                            paginationToken: lastUpdatedKey,
+                            transfers: utility.dbTransformMapper(result.Items),
+                            display_name : constants.ColumnMappings
+                        }),
+                    };
+                }
+            default: throw "Error! fileType not accepted"
         }
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                fileType: type,
-                paginationToken: lastUpdatedKey,
-                transfers: utility.dbTransformMapper(result.Items)
-            }),
-        };
+
     } catch (error) {
         console.error("Error fetching transfers:", error);
         return {

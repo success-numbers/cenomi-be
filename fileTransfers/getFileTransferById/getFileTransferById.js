@@ -1,17 +1,10 @@
 const AWS = require("aws-sdk");
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const utility = require('./utility');
+
 exports.handler = async (event) => {
     try {
-        const { type, fileName = null } = event.queryStringParameters;
-        const validFileTypes = ["ALLOC", "GRN", "GSD", "BRI"];
-
-        if (!validFileTypes.includes(type)) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: "Invalid fileType" }),
-            };
-        }
+        const { fileName = null } = event.queryStringParameters;
 
         if(!fileName){
             return {

@@ -5,7 +5,31 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event, context) => {
     try {
-        const syncStartTime =  new Date().toISOString();
+        console.log("Trigger Sync Databricks Event", JSON.stringify(event));
+        const { body = null } = event;
+        let syncStartTime = null;
+        if(body != null){
+            const eventBody = JSON.parse(body);
+            const { startSyncTime = null} = eventBody;
+        }else{
+            // Fetch Latest last Synced Time from DB
+            let params = {
+                TableName: process.env.syncTableName,
+                IndexName: 'status-timestamp-index',
+                KeyConditionExpression: `status = :value`,
+                ExpressionAttributeValues: {
+                    ':value': "DONE" 
+                },
+                ScanIndexForward: false,
+                Limit: 1
+            };
+            const result = await docClient.query(params).promise();
+            if(result.Count > 0){
+                syncStartTime = result.Items[0].SK;
+            }else{
+                syncStartTime =  new Date().toISOString();
+            }
+        }
         const databrickApiInit = await utility.databricksApi();
         if(!databrickApiInit.data  && !databrickApiInit.data.statement_id){
             console.log("Error! DATABRICKS API FAILED TO CREATE STATEMENT ID");
@@ -16,7 +40,7 @@ exports.handler = async (event, context) => {
             TableName: process.env.syncTableName,
             Item: {
                 PK: statementId,
-                SK: syncStartTime,
+                SK: new Date().toISOString(),
                 status: 'PENDING'
             }
         };
