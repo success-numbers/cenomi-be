@@ -95,7 +95,7 @@ async function deleteAuditEntries(fileName, auditTable) {
     try {
         const queryResult = await dynamoDb.query(queryParams).promise();
 
-        // Delete each item found by the query
+       
         const deletePromises = queryResult.Items.map(async (item) => {
             const deleteParams = {
                 TableName: auditTable,
@@ -103,7 +103,7 @@ async function deleteAuditEntries(fileName, auditTable) {
                     PK: item.PK,
                     SK: item.SK,
                 },
-                ConditionExpression: 'attribute_exists(PK)', // Add any conditions if needed
+                ConditionExpression: 'attribute_exists(PK)', 
             };
 
             return dynamoDb.delete(deleteParams).promise();

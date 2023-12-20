@@ -8,7 +8,6 @@ async function validateALLOC(payload, dataTable) {
     try {
         const barcodeMap = {};
 
-        // Group items by barcode and accumulate quantities
         for (const boxId in payload.transferBoxes) {
             const items = payload.transferBoxes[boxId];
             for (const item of items) {
@@ -21,13 +20,13 @@ async function validateALLOC(payload, dataTable) {
         }
 
         const barcodes = Object.keys(barcodeMap);
-        const batchSize = 25; // Set your desired batch size
+        const batchSize = 25; 
         const batches = [];
         for (let i = 0; i < barcodes.length; i += batchSize) {
             batches.push(barcodes.slice(i, i + batchSize));
         }
 
-        // Perform batch get requests for barcodes in batches
+      
         for (const batch of batches) {
             const params = {
                 RequestItems: {
@@ -47,7 +46,7 @@ async function validateALLOC(payload, dataTable) {
                     (item) => item.SK === `ALLOC#BAR#${requestedBarcode}`
                 );
 
-                // Validate existence of the barcode item
+               
                 if (!foundItem) {
                     return {
                         isValid: false,
@@ -77,7 +76,7 @@ async function validateGRN(payload, dataTable) {
     try {
         const barcodes = [];
 
-        // Gather unique barcodes from the payload
+        
         for (const boxId in payload.transferBoxes) {
             const items = payload.transferBoxes[boxId];
             for (const item of items) {
@@ -87,13 +86,13 @@ async function validateGRN(payload, dataTable) {
             }
         }
         console.log(barcodes);
-        const batchSize = 25; // Set your desired batch size
+        const batchSize = 25;
         const batches = [];
         for (let i = 0; i < barcodes.length; i += batchSize) {
             batches.push(barcodes.slice(i, i + batchSize));
         }
         console.log(batches);
-        // Perform batch get requests for barcodes in batches
+      
         for (const batch of batches) {
             const params = {
                 RequestItems: {
@@ -113,7 +112,7 @@ async function validateGRN(payload, dataTable) {
                     (item) => item.SK === `GRN#BAR#${requestedBarcode}`
                 );
 
-                // Validate existence of the barcode item
+               
                 if (!foundItem) {
                     return {
                         isValid: false,
@@ -136,7 +135,7 @@ async function validateDSD(payload, dataTable) {
     try {
         const inputBoxIds = [];
 
-        // Gather unique inputBoxIds from the payload
+       
         for (const boxId in payload.transferBoxes) {
             const items = payload.transferBoxes[boxId];
             for (const item of items) {
@@ -146,13 +145,12 @@ async function validateDSD(payload, dataTable) {
             }
         }
 
-        const batchSize = 25; // Set your desired batch size
+        const batchSize = 25; 
         const batches = [];
         for (let i = 0; i < inputBoxIds.length; i += batchSize) {
             batches.push(inputBoxIds.slice(i, i + batchSize));
         }
 
-        // Perform batch get requests for inputBoxIds in batches
         for (const batch of batches) {
             const params = {
                 RequestItems: {
