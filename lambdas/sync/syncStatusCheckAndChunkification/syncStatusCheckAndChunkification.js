@@ -13,8 +13,11 @@ exports.handler = async (event, context) => {
         console.log("MEOW 2", statemnentIdStatus);
         if(statemnentIdStatus.data.status.state == "SUCCEEDED"){
             const manifest = statemnentIdStatus.data.manifest;
-            const chunksList = manifest.chunks;
-            await utility.insertChunksDataToDynamoDB(chunksList,process.env.chunkTableName,getLatestStatementQueryItem.PK);
+            const chunksList = manifest.chunks ?? [];
+            if(chunksList.length == 0){
+                await utility.updateSyncHeaderStatus(getLatestStatementQueryItem.PK, getLatestStatementQueryItem.SK);
+            }
+            await utility.insertChunksDataToDynamoDB(chunksList, process.env.chunkTableName, getLatestStatementQueryItem.PK, getLatestStatementQueryItem.SK);
             console.log("MEOW PROCESSED SUCCEFULLY");
             return;
         }else{

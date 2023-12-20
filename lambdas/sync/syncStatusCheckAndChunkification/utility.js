@@ -66,7 +66,7 @@ exports.getLatestStatementIdFromDB = async (syncTableName) => {
     }
 }
 
-exports.insertChunksDataToDynamoDB = async (chunksList, chunkTableName, statementId) => {
+exports.insertChunksDataToDynamoDB = async (chunksList, chunkTableName, statementId, parentDataTimestamp) => {
     const createdAt = new Date().toISOString();
     const batchSize = 25; // Maximum number of items per batch write operation
 
@@ -78,6 +78,7 @@ exports.insertChunksDataToDynamoDB = async (chunksList, chunkTableName, statemen
                     Item: {
                         PK: statementId,
                         SK: `${chunkItem.chunk_index}`,
+                        parentDataTimestamp: parentDataTimestamp,
                         createdAt: createdAt
                     },
                     ConditionExpression: 'attribute_not_exists(PK)',
@@ -117,3 +118,23 @@ exports.insertChunksDataToDynamoDB = async (chunksList, chunkTableName, statemen
         // Handle errors or retries if needed
     }
 }
+
+exports.updateSyncHeaderStatus = async (statementId, parentDataTimestamp) => {
+    const params = {
+      TableName: process.env.syncTableName,
+      Key: {
+        'PK': statementId,
+        'SK': parentDataTimestamp
+      },
+      UpdateExpression: 'SET #status = :newValue',
+      ExpressionAttributeValues: {
+        ':newValue': 'DONE'
+      },
+      ExpressionAttributeNames: {
+        '#status': 'status' 
+      }
+    };
+    console.log("MEOW update header status", params);
+    await docClient.update(params).promise();
+  };
+  

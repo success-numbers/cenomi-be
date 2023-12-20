@@ -14,7 +14,6 @@ async function getTransferDetails(transferId) {
 
     try {
         const result = await dynamoDb.get(params).promise();
-
         if (!result.Item) {
             throw new Error('Transfer details not found');
         }
@@ -61,8 +60,8 @@ exports.handler = async (event) => {
             transferSeqId: transferId,
             destLocId: destLocId,
             status: transferDetails.status,
-            fromStore: transferDetails['fromStore'],
-            fromStoreName: transferDetails['fromStoreName'],
+            fromStore: transferDetails['fromStore'] ?? null,
+            fromStoreName: transferDetails['fromStoreName'] ?? null,
             docNo: transferDetails['docNo'],
             docDate: transferDetails.timestamp,
         };
@@ -84,7 +83,7 @@ exports.handler = async (event) => {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify({ "message": "Internal server error" }),
+            body: JSON.stringify({ "message": `Error! ${e.toString()}`}),
         };
         return res;
     }

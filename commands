@@ -2,3 +2,4 @@
 
   cdk deploy  cenomi-integration-sit-buisness-stack --profile default  -c deploy-environment=sit
 
+  cdk deploy  cenomi-integration-sit-dynamodb-stack --profile default  -c deploy-environment=sit
