@@ -3,66 +3,55 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
     try {
-        const { type } = event.queryStringParameters || {};
-        const { fileName } = JSON.parse(event.body);
+        const { UserId, fileName, fileType, TimeStamp } = JSON.parse(event.body);
 
-        if (!type || !fileName) {
+        if (!UserId || !fileName || !fileType || !TimeStamp) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'Type and fileName are required.' }),
+                body: JSON.stringify({ message: 'UserId, fileName, fileType, and TimeStamp are required.' }),
             };
         }
 
-        const dataTable = process.env.dataTable;
+        const auditTable = process.env.auditTable;
+        const fileTransferDataTable = process.env.dataTable;
 
-        switch (type.toUpperCase()) {
-            case 'ALLOC':
-                // Check if all detail items for fileName in dataTable have isScanned as true
-                const allocParams = {
-                    TableName: dataTable,
-                    KeyConditionExpression: 'PK = :pk',
-                    ExpressionAttributeValues: {
-                        ':pk': fileName,
-                    },
-                    FilterExpression: 'entityType = :entityType AND attribute_exists(isScanned) AND isScanned = :scanned',
-                    ExpressionAttributeValues: {
-                        ':entityType': 'DETAIL',
-                        ':scanned': true,
-                    },
-                };
-
-                const allocResult = await dynamoDb.query(allocParams).promise();
-
-                if (allocResult.Count === 0) {
-                    return {
-                        statusCode: 400,
-                        body: JSON.stringify({ message: 'Not all detail items are scanned for ALLOC.' }),
-                    };
-                }
-
-                // Change status of header level row to SUBMITTED in dataTable for ALLOC
-                await updateHeaderStatus(fileName, dataTable);
-                break;
-
-            case 'GRN':
-            case 'DSD':
-                // Change status of header level row to SUBMITTED in dataTable for GRN or DSD
-                await updateHeaderStatus(fileName, dataTable);
-                break;
-
-            default:
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({ message: 'Invalid type provided.' }),
-                };
-        }
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: `Status updated to SUBMITTED for ${type}.` }),
+        const auditQueryParams = {
+            TableName: auditTable,
+            KeyConditionExpression: 'PK = :pk',
+            ExpressionAttributeValues: {
+                ':pk': fileName,
+            },
+            ScanIndexForward: false,
         };
+
+        const auditQueryResult = await dynamoDb.query(auditQueryParams).promise();
+
+        if (auditQueryResult.Count > 0) {
+            const latestAuditEntry = auditQueryResult.Items[0];
+
+            if (latestAuditEntry.userId === UserId) {
+                await updateHeaderStatus(fileName, fileTransferDataTable);
+                await deleteAuditEntries(fileName, auditTable);
+
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ message: `Status updated to SUBMITTED for ${fileType}.` }),
+                };
+            } else {
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ message: 'Picking is in progress by another user.' }),
+                };
+            }
+        } else {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: 'No audit entries found for the given fileName.' }),
+            };
+        }
     } catch (error) {
         console.error('Error:', error.message);
+
         return {
             statusCode: 500,
             body: JSON.stringify({ message: `Internal server error: ${error.message}` }),
@@ -86,5 +75,43 @@ async function updateHeaderStatus(fileName, dataTable) {
         },
     };
 
-    await dynamoDb.update(updateParams).promise();
+    try {
+        await dynamoDb.update(updateParams).promise();
+    } catch (error) {
+        console.error('Update Header Status Error:', error.message);
+        throw new Error(`Update Header Status Error: ${error.message}`);
+    }
+}
+
+async function deleteAuditEntries(fileName, auditTable) {
+    const queryParams = {
+        TableName: auditTable,
+        KeyConditionExpression: 'PK = :pk',
+        ExpressionAttributeValues: {
+            ':pk': fileName,
+        },
+    };
+
+    try {
+        const queryResult = await dynamoDb.query(queryParams).promise();
+
+        // Delete each item found by the query
+        const deletePromises = queryResult.Items.map(async (item) => {
+            const deleteParams = {
+                TableName: auditTable,
+                Key: {
+                    PK: item.PK,
+                    SK: item.SK,
+                },
+                ConditionExpression: 'attribute_exists(PK)', // Add any conditions if needed
+            };
+
+            return dynamoDb.delete(deleteParams).promise();
+        });
+
+        await Promise.all(deletePromises);
+    } catch (error) {
+        console.error('Delete Audit Entries Error:', error.message);
+        throw new Error(`Delete Audit Entries Error: ${error.message}`);
+    }
 }

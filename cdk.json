@@ -81,6 +81,7 @@
         "InditexDataTable": "Inditex-Data",
         "FileTransferDataTable": "FileTransfer-Data",
         "FileTransferSyncTable": "FileTransfer-Sync",
+        "FileTransferAuditTable": "FileTransfer-Audit",
         "ConfigTable": "Config",
         "ChunkTable": "ChunkTable",
         "SyncDataTable": "SyncDataTable"
