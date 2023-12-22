@@ -11,7 +11,7 @@ exports.getStatsForSearchCriteria = async (filters) => {
     console.log("MEOW BASE PARMS FINAL", baseParams);
     const result = await docClient.query(baseParams).promise();
     console.log("DB Result", result);
-    const modifiedResponse = dashStatsDataFormatterResponse(result.Items);
+    const modifiedResponse = dashStatsDataFormatterResponse(filters, result.Items ?? []);
     return modifiedResponse;
 } 
 
@@ -124,10 +124,8 @@ const dashStatsDataFormatterResponse = (filters, dbItems ) => {
         tsf_type: tsfType,
         tsf_status: tsfStatus
     };
+    console.log("MEOW 1", dbItems);
 
-    let allOpen = 0;
-    let allInProgress = 0;
-    let allSubmitted = 0;
     let statusMap = {
         "OPEN": 0,
         "INPROGRESS": 0,
@@ -158,21 +156,21 @@ const dashStatsDataFormatterResponse = (filters, dbItems ) => {
             "value": 0
         }
     })
+    console.log("MEOW reach 2", fileTsf);
     let totalPieVal = 0
-    fileTsf.forEach((e) => {
-        totalPieVal+= e.value;
-    })
+
     dbItems.forEach((e) => {
-        if(e.status == "OPEN") {
+        console.log("MEOW reach 4", e);
+        if(e['status'] && e.status == "OPEN") {
             statusMap["OPEN"] += 1;
             fileTypeStatusStat[e.fileType]["OPEN"] += 1;
 
         }
-        if(e.status == "INPROGRESS") {
+        if(e['status'] && e.status == "INPROGRESS") {
             statusMap["INPROGRESS"] += 1;
             fileTypeStatusStat[e.fileType]["INPROGRESS"] += 1;
         }
-        if(e.status == "SUBMITTED") {
+        if(e['status'] && e.status == "SUBMITTED") {
             statusMap["SUBMITTED"] += 1;
             fileTypeStatusStat[e.fileType]["SUBMITTED"] += 1;
         }
@@ -180,7 +178,10 @@ const dashStatsDataFormatterResponse = (filters, dbItems ) => {
         let f = fileTsf.findIndex((d) => d.key == e.fileType);
         fileTsf[f].value += 1; 
     })
-    
+    fileTsf.forEach((e) => {
+            console.log("MEOW reach 3", e);
+        totalPieVal+= e.value;
+    })
     let stats = constants.statsTypes.map((stat) => {
         return {
             "key": stat.dbKey,
@@ -195,6 +196,7 @@ const dashStatsDataFormatterResponse = (filters, dbItems ) => {
         pie_stats: fileTsf
     }
     let barStat = []
+    console.log("MEOW REACh4",response);
     Object.keys(fileTypeStatusStat).forEach((e) =>{
         barStat.push({
             type: e,
@@ -202,17 +204,17 @@ const dashStatsDataFormatterResponse = (filters, dbItems ) => {
                 {
                     "status": "OPEN",
                     "display_status": "Open",
-                    "count": e[fileTypeStatusStat]["OPEN"] ?? 0
+                    "count": fileTypeStatusStat[e]["OPEN"] ?? 0
                 },
                 {
                     "status": "INPROGRESS",
                     "display_status": "In Progress",
-                    "count": e[fileTypeStatusStat]["INPROGRESS"] ?? 0
+                    "count": fileTypeStatusStat[e]["INPROGRESS"] ?? 0
                 },
                 {
                     "status": "SUBMITTED",
                     "display_status": "Submitted",
-                    "count": e[fileTypeStatusStat]["SUBMITTED"] ?? 0
+                    "count": fileTypeStatusStat[e]["SUBMITTED"] ?? 0
                 }
             ]
 

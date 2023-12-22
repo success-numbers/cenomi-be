@@ -18,7 +18,7 @@ exports.handler = async (event) => {
             };
         }
 
-        const statuses = status.split(",").map((s) => s.trim());
+        let statuses = status.split(",").map((s) => s.trim());
 
         for (const s of statuses) {
             if (!validStatusValues.includes(s)) {
@@ -28,7 +28,10 @@ exports.handler = async (event) => {
                 };
             }
         }
-
+        console.log("STATUSES", statuses);
+        if(statuses.includes("ALL")){
+            statuses = ['OPEN', 'INPROGRESS', 'SUBMIMTTED'];
+        }
         switch(type){
             case "ALL": {
 
@@ -37,6 +40,7 @@ exports.handler = async (event) => {
                     ...utility.allTransferQueryHandler(statuses, startDate, endDate, lastEvaluatedKey),
                     Limit: limit,
                 };
+                console.log("DB PARAMS", params);
                 const result = await dynamoDb.query(params).promise();
                 let lastUpdatedKey = null;
                 if (result && result.LastEvaluatedKey) {
@@ -55,7 +59,6 @@ exports.handler = async (event) => {
             case "ALLOC":
             case "GRN":
             case "DSD":
-            case "BRI":
                 {
                     const params = {
                         TableName: process.env.tableName,
@@ -63,7 +66,8 @@ exports.handler = async (event) => {
                         ...utility.buildSearchConstraints(statuses, type, startDate, endDate, lastEvaluatedKey),
                         Limit: limit,
                     };
-            
+                            console.log("DB PARAMS", params);
+
                     const result = await dynamoDb.query(params).promise();
                     let lastUpdatedKey = null;
                     if (result && result.LastEvaluatedKey) {
@@ -79,6 +83,30 @@ exports.handler = async (event) => {
                         }),
                     };
                 }
+                case "BRI":
+                    {
+                        const params = {
+                            TableName: process.env.tableName,
+                            IndexName: "fileType-createdAt-index",
+                            ...utility.buildSearchConstraints(['OPEN', "INPROGRESS", "SUBMITTED"], type, startDate, endDate, lastEvaluatedKey),
+                            Limit: limit,
+                        };
+                
+                        const result = await dynamoDb.query(params).promise();
+                        let lastUpdatedKey = null;
+                        if (result && result.LastEvaluatedKey) {
+                            lastUpdatedKey = btoa(JSON.stringify(result.LastEvaluatedKey))
+                        }
+                        return {
+                            statusCode: 200,
+                            body: JSON.stringify({
+                                fileType: type,
+                                paginationToken: lastUpdatedKey,
+                                transfers: utility.dbTransformMapper(result.Items),
+                                display_name : constants.ColumnMappings
+                            }),
+                        };
+                    }
             default: throw "Error! fileType not accepted"
         }
 

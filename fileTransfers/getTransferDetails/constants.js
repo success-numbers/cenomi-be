@@ -1,4 +1,4 @@
-const TRNTYPES = ["ALLOC", "GRN", "GSD", "BRI"];
+const TRNTYPES = ["ALLOC", "GRN", "DSD", "BRI"];
 
 const SKPREFIX = {
     "ALLOC": "ALLOC#BAR",

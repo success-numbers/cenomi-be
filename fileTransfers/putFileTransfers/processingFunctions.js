@@ -150,7 +150,7 @@ async function processGSD(payload, tableName) {
                 PutRequest: {
                     Item: {
                         PK: fileName,
-                        SK: `GSD#IBXID#${inputBoxId}`,
+                        SK: `DSD#IBXID#${inputBoxId}`,
                         storeCode,
                         inputBoxId,
                         entityType:"DETAIL",
@@ -176,7 +176,7 @@ async function processGSD(payload, tableName) {
 
         return { success: true };
     } catch (error) {
-        console.error('Error processing GSD payload:', error.message);
+        console.error('Error processing DSD payload:', error.message);
         return { success: false, errorMessage: error.message };
     }
 }
@@ -211,6 +211,7 @@ async function processBRI(payload, tableName) {
 
         // BatchWriteItem to insert items in DynamoDB
         await batchWriteToDynamoDB(tableName, items);
+        const createdAt = new Date().toISOString();
 
         // Store header level information in the same table
         await dynamoDb.put({
@@ -219,9 +220,10 @@ async function processBRI(payload, tableName) {
                 PK: fileName,
                 SK: `HEAD#${fileName}`,
                 userId,
-                entityType: 'HEADER',
-                status:'OPEN',
-                fileType: fileType
+                entityType: 'BRIHEADER',
+                status: 'OPEN',
+                fileType: fileType,
+                createdAt: createdAt
             },
         }).promise();
 
