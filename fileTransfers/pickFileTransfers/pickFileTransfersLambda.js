@@ -3,12 +3,12 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
     try {
-        const { UserId, fileName, fileType, TimeStamp } = JSON.parse(event.body);
+        const { userId, fileName, fileType, timestamp } = JSON.parse(event.body);
 
-        if (!UserId || !fileName || !fileType || !TimeStamp) {
+        if (!userId || !fileName || !fileType || !timestamp) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'UserId, fileName, fileType, and TimeStamp are required.' }),
+                body: JSON.stringify({ message: 'userId, fileName, fileType, and timestamp are required.' }),
             };
         }
         
@@ -18,8 +18,8 @@ exports.handler = async (event) => {
             TableName: auditTable,
             Item: {
                 PK: fileName,
-                SK: TimeStamp,
-                userId: UserId,
+                SK: timestamp,
+                userId: userId,
                 fileType: fileType,
             },
         };
