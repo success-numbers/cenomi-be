@@ -6,7 +6,7 @@ exports.handler = async (event) => {
         console.log('Event body:', event);
         const requestBody = JSON.parse(event.body || '{}');
 
-        const { user_id, dest_id, transferSeqId,deviceId,timestamp, pickedItems } = requestBody;
+        const { user_id, dest_id, transferSeqId, pickedItems } = requestBody;
 
         if (!user_id || !dest_id || !transferSeqId || !pickedItems) {
             return {
@@ -18,19 +18,7 @@ exports.handler = async (event) => {
                 body: JSON.stringify({ "message": "Missing mandatory request fields" }),
             };
         }
-        const auditTable = process.env.auditTable;
-        console.log(auditTable);
-        const params = {
-            TableName: auditTable,
-            Item: {
-                PK: transferSeqId,
-                SK: timestamp,
-                userId: user_id,
-                fileType: "INDITEX",
-                deviceId: deviceId
-            },
-        };
-        await dynamoDb.put(params).promise();
+
         console.log(pickedItems);
         const updatePromises = pickedItems.map(async item => {
             const params = {
@@ -75,7 +63,7 @@ exports.handler = async (event) => {
           
 
         await Promise.all(updatePromises);
-        
+
         return {
             statusCode: 200,
             headers: {
