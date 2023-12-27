@@ -39,6 +39,7 @@ async function processALLOC(payload, syncTable, dataTable) {
                         SK: `BXID#${boxId}#BAR#${barcode}`,
                         ASN: asn,
                         entityType: 'DETAIL',
+                        boxId: boxId,
                         ...item,
                     };
 
@@ -95,6 +96,7 @@ async function processGRN(payload, syncTable, dataTable) {
                         PK: fileName,
                         SK: `BXID#${boxId}#BAR#${barcode}`,
                         entityType: 'DETAIL',
+                        boxId: boxId,
                         ...item,
                     };
                     items.push({ PutRequest: { Item: itemEntry } });
@@ -149,6 +151,8 @@ async function processDSD(payload, syncTable, dataTable) {
                         SK: `BXID#${boxId}#IBXID#${inputBoxId}`,
                         ASN: asn,
                         entityType: 'DETAIL',
+                        inputBoxId: inputBoxId,
+                        boxId: boxId,
                         ...item,
                     };
                     items.push({ PutRequest: { Item: itemEntry } });
