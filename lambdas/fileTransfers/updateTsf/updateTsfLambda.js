@@ -3,6 +3,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
     try {
+        console.log(event.body)
         const { fileName, fileType, row } = JSON.parse(event.body);
 
         if (!fileName || !fileType || !row) {
@@ -14,7 +15,7 @@ exports.handler = async (event) => {
 
         const syncTable = process.env.syncTable;
         const dataTable = process.env.dataTable;
-        const { brand, storeCode, barcode, quantity, asn, boxId } = row;
+        const { brand, storeCode, itemBarcode, quantity, asn, boxId } = row;
 
         // Calculate the difference between the new and old quantity values
         const currentQuantity = parseInt(quantity);
@@ -24,16 +25,18 @@ exports.handler = async (event) => {
             TableName: syncTable,
             Key: {
                 PK: fileName,
-                SK: `BXID#${boxId}#BAR#${barcode}`,
+                SK: `BXID#${boxId}#BAR#${itemBarcode}`,
             },
         };
+        
+        console.log('fetching ',syncParams);
 
         const syncResult = await dynamoDb.get(syncParams).promise();
 
         if (!syncResult || !syncResult.Item || !syncResult.Item.quantity) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'No quantity found for the provided barcode and boxId.' }),
+                body: JSON.stringify({ message: 'No quantity found for the provided itemBarcode and boxId.' }),
             };
         }
 
@@ -45,7 +48,7 @@ exports.handler = async (event) => {
             TableName: syncTable,
             Key: {
                 PK: fileName,
-                SK: `BXID#${boxId}#BAR#${barcode}`,
+                SK: `BXID#${boxId}#BAR#${itemBarcode}`,
             },
             UpdateExpression: 'SET #quantity = :quantity',
             ExpressionAttributeNames: {
@@ -63,7 +66,7 @@ exports.handler = async (event) => {
             TableName: dataTable,
             Key: {
                 PK: fileName,
-                SK: `${fileType}#BAR#${barcode}`,
+                SK: `${fileType}#BAR#${itemBarcode}`,
             },
             UpdateExpression: 'ADD #pickedQuantity :quantityDiff',
             ExpressionAttributeNames: {
