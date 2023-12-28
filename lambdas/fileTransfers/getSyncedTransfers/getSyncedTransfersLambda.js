@@ -39,20 +39,18 @@ exports.handler = async (event) => {
         };
 
         const syncResult = await dynamoDb.query(syncParams).promise();
-
+        console.log("MEOW RESULTS", syncResult);
+        // Fetch unscanned data from the data table with the given filename where isScanned is false or not defined
         // const unscannedParams = {
         //     TableName: dataTable,
         //     IndexName: 'scnnedIndex',
-        //     KeyConditionExpression: 'PK = :filename',
+        //     KeyConditionExpression: 'PK = :fileName',
         //     ExpressionAttributeValues: {
-        //         ':filename': filename,
-        //     },
-        //     FilterExpression: 'attribute_not_exists(isScanned) OR isScanned = :scanned',
-        //     ExpressionAttributeValues: {
+        //         ':fileName': fileName,
         //         ':scanned': false,
         //     },
+        //     FilterExpression: 'attribute_not_exists(isScanned) OR isScanned = :scanned',
         // };
-        
 
         // const unscannedResult = await dynamoDb.query(unscannedParams).promise();
 
@@ -60,16 +58,10 @@ exports.handler = async (event) => {
         // combinedResult.push(...(unscannedResult.Items || []));
 
         // Map the combined data based on transfer type
-        const mappedData = transferItemUnifiedHandler(combinedResult, fileType);
-        const formattedData = {
-            fileName: fileName,
-            fileType: fileType,
-            Items: mappedItems,
-        };
-        
+        const mappedData = transferItemUnifiedHandler(syncResult.Items, fileType);
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Data fetched successfully.', body : mappedData }),
+            body: JSON.stringify({ message: 'Data fetched successfully.', fileName:fileName, fileType: fileType, Items: mappedData }),
         };
     } catch (error) {
         console.error('Error:', error.message);
