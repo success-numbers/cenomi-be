@@ -3,33 +3,56 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
     try {
-        const { userId, fileName, fileType, timestamp, deviceId } = JSON.parse(event.body);
+        const {  key, entityId, userId, fileType, timestamp, deviceId } = JSON.parse(event.body);
 
-        if (!userId || !fileName || !fileType || !timestamp ||!deviceId) {
+        if (!key || !entityId || !userId || !fileType || !timestamp || !deviceId) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'userId, fileName, fileType, and timestamp are required.' }),
+                body: JSON.stringify({ message: 'key, entityId, userId, fileType, timestamp, deviceId are required.' }),
             };
         }
-        
-        const auditTable = process.env.auditTable;
-        console.log(auditTable);
+
+        const lockTbale = process.env.lockTbale;
+
+
+        const qParams = {
+            TableName: process.env.lockTbale,
+            KeyConditionExpression: 'PK= :entityId and SK= :key',
+            ExpressionAttributeValues: {
+                ":entityId": entityId,
+                ":key": key
+            },
+            Limit: 1,
+        };
+
+        const result = await dynamoDb.query(qParams).promise();
+        console.log('SearchedExisting:', result);
+
+        if (result && result.Count > 0) {
+            return {
+                statusCode: 200,
+                body: JSON.stringify({ message: `Data already exists in lockTbale created at ${result.Items[0].timestamp}.` }),
+            };
+        }
+
         const params = {
-            TableName: auditTable,
+            TableName: lockTbale,
             Item: {
-                PK: fileName,
-                SK: timestamp,
+                PK: entityId,
+                SK: key,
                 userId: userId,
+                timestamp: timestamp,
                 fileType: fileType,
                 deviceId: deviceId
             },
         };
-        console.log(auditTable);
+
+        console.log(params);
         await dynamoDb.put(params).promise();
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Data inserted into auditTable successfully.' }),
+            body: JSON.stringify({ message: 'Data inserted into lockTbale successfully.' }),
         };
     } catch (error) {
         console.error('Error:', error.message);

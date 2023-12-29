@@ -11,11 +11,11 @@ exports.handler = async (event) => {
             };
         }
 
-        const auditTable = process.env.auditTable;
+        const lockTbale = process.env.lockTbale;
         const fileTransferDataTable = process.env.dataTable;
 
         const auditQueryParams = {
-            TableName: auditTable,
+            TableName: lockTbale,
             KeyConditionExpression: 'PK = :pk',
             ExpressionAttributeValues: {
                 ':pk': fileName,
@@ -30,7 +30,7 @@ exports.handler = async (event) => {
 
             if (latestAuditEntry.userId === userId) {
                 await updateHeaderStatus(fileName, fileTransferDataTable);
-                await deleteAuditEntries(fileName, auditTable);
+                await deleteAuditEntries(fileName, lockTbale);
 
                 return {
                     statusCode: 200,
@@ -82,9 +82,9 @@ async function updateHeaderStatus(fileName, dataTable) {
     }
 }
 
-async function deleteAuditEntries(fileName, auditTable) {
+async function deleteAuditEntries(fileName, lockTbale) {
     const queryParams = {
-        TableName: auditTable,
+        TableName: lockTbale,
         KeyConditionExpression: 'PK = :pk',
         ExpressionAttributeValues: {
             ':pk': fileName,
@@ -97,7 +97,7 @@ async function deleteAuditEntries(fileName, auditTable) {
        
         const deletePromises = queryResult.Items.map(async (item) => {
             const deleteParams = {
-                TableName: auditTable,
+                TableName: lockTbale,
                 Key: {
                     PK: item.PK,
                     SK: item.SK,
