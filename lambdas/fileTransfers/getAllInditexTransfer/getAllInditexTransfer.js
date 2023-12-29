@@ -24,7 +24,7 @@ exports.handler = async (event) => {
 
         /*
         Issue::
-        Query needs key condition is needed so scan.. 
+        Query needs key condition so scan.. 
         but in scan limit means how many records will be scanned
         not how many will be returned.
         */
