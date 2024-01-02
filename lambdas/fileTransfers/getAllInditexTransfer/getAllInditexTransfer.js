@@ -21,39 +21,28 @@ exports.handler = async (event) => {
             statusFilter = i === 0 ? `#status= :stat${i}` : `${statusFilter} or #status= :stat${i}`;
             expValues[`:stat${i}`] = statuses[i];
         }
+        
+        expValues[`:headDataInd`] = 'HEADER'
 
-        /*
-        Issue::
-        Query needs key condition so scan.. 
-        but in scan limit means how many records will be scanned
-        not how many will be returned.
-        */
-
-        const qParams = lastEvaluatedKey ? {
+        const qParams = {
             TableName: process.env.indexTable,
-            FilterExpression: statusFilter,
-            ExclusiveStartKey: { "PK": lastEvaluatedKey.split("_SK_")[0], "SK": lastEvaluatedKey.split("_SK_")[1] },
-            ExpressionAttributeNames: {
-                '#status': 'status'
-            },
-            ExpressionAttributeValues: expValues,
-            PageSize: limit,
-        } : {
-            TableName: process.env.indexTable,
+            IndexName: 'TypeIndex',
+            KeyConditionExpression: "entityType = :headDataInd",
+            ExclusiveStartKey: lastEvaluatedKey ? JSON.parse(atob(lastEvaluatedKey)) : undefined,
             FilterExpression: statusFilter,
             ExpressionAttributeNames: {
                 '#status': 'status'
             },
             ExpressionAttributeValues: expValues,
-            PageSize: limit,
+            Limit: limit,
         };
-        const result = await dynamoDb.scan(qParams).promise();
+        const result = await dynamoDb.query(qParams).promise();
 
         return {
             statusCode: 200,
             body: JSON.stringify(
                 {
-                    paginationToken: result.LastEvaluatedKey ? `${result.LastEvaluatedKey.PK}_SK_${result.LastEvaluatedKey.SK}` : undefined,
+                    paginationToken: result.LastEvaluatedKey ? btoa(JSON.stringify(result.LastEvaluatedKey)) : undefined,
                     transfers: result.Items,
                     display_name: {
                         userId: "USER ID",
