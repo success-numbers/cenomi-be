@@ -35,20 +35,6 @@ exports.handler = async (event) => {
             },
         };
 
-        /*
-        const params = {
-            TableName: indexTable,
-            Item: {
-                PK: `DET#${transferSeqId}`,
-                SK: barcode,
-                brand: brand,
-                entityType: 'DETAILS',
-                pickedQuantity: pickQuantity,
-                timestamp: new Date().toISOString()
-            },
-        };
-        */
-
         const res = await dynamoDb.update(params).promise();
 
         return {

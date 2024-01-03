@@ -20,10 +20,10 @@ exports.handler = async (event) => {
             TableName: fileType === 'ALLOC' || fileType === 'GRN' || fileType === 'DSD' ? dataTable : inditexTable,
             Key: {
                 PK: (fileType === 'ALLOC' || fileType === 'GRN' || fileType === 'DSD') ?
-                    (entityId.indexOf("/") > 0 ? entityId.substring(0, entityId.indexOf("/")) : entityId)
+                    (entityId.indexOf("#") > 0 ? entityId.substring(0, entityId.indexOf("#")) : entityId)
                     : `HEAD#${entityId}`,
                 SK: (fileType === 'ALLOC' || fileType === 'GRN' || fileType === 'DSD') ?
-                    `HEAD#${(entityId.indexOf("/") > 0 ? entityId.substring(0, entityId.indexOf("/")) : entityId)}`
+                    `HEAD#${(entityId.indexOf("#") > 0 ? entityId.substring(0, entityId.indexOf("#")) : entityId)}`
                     : `HEAD#${entityId}`,
             },
             ConditionExpression: '#status = :openStatus or #status = :inProgressStatus',
