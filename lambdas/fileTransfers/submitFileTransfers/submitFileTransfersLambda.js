@@ -10,7 +10,12 @@ exports.handler = async (event) => {
                 body: JSON.stringify({ message: 'userId, fileName, fileType, and timestamp are required.' }),
             };
         }
-
+        await updateHeaderStatus(fileName, process.env.dataTable);
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Picking is in progress by another user.' }),
+        };
+        // TODO: Locking Mechanism 
         const lockTbale = process.env.lockTbale;
         const fileTransferDataTable = process.env.dataTable;
 
