@@ -3,7 +3,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
     try {
-        const {  key, entityId, userId, fileType, timestamp, deviceId } = JSON.parse(event.body);
+        const { key, entityId, userId, fileType, timestamp, deviceId } = JSON.parse(event.body);
 
         if (!key || !entityId || !userId || !fileType || !timestamp || !deviceId) {
             return {
@@ -12,11 +12,47 @@ exports.handler = async (event) => {
             };
         }
 
-        const lockTbale = process.env.lockTbale;
+        const lockTable = process.env.lockTable;
+        const dataTable = process.env.dataTable;
+        const inditexTable = process.env.inditexTable;
 
+        const updateParams = {
+            TableName: fileType === 'ALLOC' || fileType === 'GRN' || fileType === 'DSD' ? dataTable : inditexTable,
+            Key: {
+                PK: (fileType === 'ALLOC' || fileType === 'GRN' || fileType === 'DSD') ?
+                    (entityId.indexOf("/") > 0 ? entityId.substring(0, entityId.indexOf("/")) : entityId)
+                    : `HEAD#${entityId}`,
+                SK: (fileType === 'ALLOC' || fileType === 'GRN' || fileType === 'DSD') ?
+                    `HEAD#${(entityId.indexOf("/") > 0 ? entityId.substring(0, entityId.indexOf("/")) : entityId)}`
+                    : `HEAD#${entityId}`,
+            },
+            ConditionExpression: '#status = :openStatus or #status = :inProgressStatus',
+            UpdateExpression: 'SET #status = :inProgressStatus',
+            ExpressionAttributeNames: {
+                "#status": 'STATUS'
+            },
+            ExpressionAttributeValues: {
+                ":openStatus": 'OPEN',
+                ":inProgressStatus": 'INPROGRESS'
+            },
+            Limit: 1,
+        };
+
+        console.log('Updating to In progress: ', updateParams);
+
+        try {
+            await dynamoDb.update(updateParams).promise();
+        }
+        catch (ex) {
+            console.log(ex);
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: `Invalid data provided` }),
+            };
+        }
 
         const qParams = {
-            TableName: process.env.lockTbale,
+            TableName: process.env.lockTable,
             KeyConditionExpression: 'PK= :entityId and SK= :key',
             ExpressionAttributeValues: {
                 ":entityId": entityId,
@@ -31,12 +67,12 @@ exports.handler = async (event) => {
         if (result && result.Count > 0) {
             return {
                 statusCode: 200,
-                body: JSON.stringify({ message: `Data already exists in lockTbale created at ${result.Items[0].timestamp}.` }),
+                body: JSON.stringify({ message: `Data already exists in lockTable created at ${result.Items[0].timestamp}.` }),
             };
         }
 
         const params = {
-            TableName: lockTbale,
+            TableName: lockTable,
             Item: {
                 PK: entityId,
                 SK: key,
@@ -52,7 +88,7 @@ exports.handler = async (event) => {
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Data inserted into lockTbale successfully.' }),
+            body: JSON.stringify({ message: 'Data inserted into lockTable successfully.' }),
         };
     } catch (error) {
         console.error('Error:', error.message);
