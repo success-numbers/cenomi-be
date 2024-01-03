@@ -28,7 +28,7 @@ exports.handler = async (event) => {
         let statusFilter = "";
         let expValues = {};
         if(status.includes("ALL")){
-            status = ["OPEN", "INPROGRESS"];
+            statuses = ["OPEN", "INPROGRESS"];
         }
         for (let i = 0; i < statuses.length; i++) {
             statusFilter = i === 0 ? `#status= :stat${i}` : `${statusFilter} or #status= :stat${i}`;
