@@ -29,7 +29,7 @@ exports.handler = async (event) => {
             ConditionExpression: '#status = :openStatus or #status = :inProgressStatus',
             UpdateExpression: 'SET #status = :inProgressStatus',
             ExpressionAttributeNames: {
-                "#status": 'STATUS'
+                "#status": 'status'
             },
             ExpressionAttributeValues: {
                 ":openStatus": 'OPEN',
