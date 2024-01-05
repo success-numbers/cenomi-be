@@ -57,13 +57,13 @@ exports.handler = async (event) => {
         }
 
         const response = {
-            transferSeqId: transferId,
-            destLocId: destLocId,
+            seqNo: transferId,
+            destId: destLocId,
             status: transferDetails.status,
             fromStore: transferDetails['fromStore'] ?? null,
             fromStoreName: transferDetails['fromStoreName'] ?? null,
             docNo: transferDetails['docNo'],
-            docDate: transferDetails.timestamp,
+            createdAt: transferDetails.timestamp,
             display_name: {
                 docNo: "Document No",
                 destId: "StoreId",

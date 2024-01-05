@@ -14,7 +14,7 @@ exports.handler = async (event) => {
         }
 
         const indexTable = process.env.indexTable;
-        const { itemSeqId, brand, destId, barcode, pickQuantity } = row;
+        const { itemSeqId, brand, destId, barcode, pickedQuantity } = row;
 
 
         const params = {
@@ -29,9 +29,9 @@ exports.handler = async (event) => {
                 '#pickedQuantity': 'pickedQuantity',
             },
             ExpressionAttributeValues: {
-                ':pickedQuantity': pickQuantity,
+                ':pickedQuantity': pickedQuantity,
                 ':pk': `DET#${transferSeqId}`,
-                ':sk': pickQuantity,
+                ':sk': barcode,
             },
         };
 
