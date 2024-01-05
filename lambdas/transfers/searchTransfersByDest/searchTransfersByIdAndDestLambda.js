@@ -64,6 +64,13 @@ exports.handler = async (event) => {
             fromStoreName: transferDetails['fromStoreName'] ?? null,
             docNo: transferDetails['docNo'],
             docDate: transferDetails.timestamp,
+            display_name: {
+                docNo: "Document No",
+                destId: "StoreId",
+                status: "Status",
+                createdAt: "Created At",
+                seqNo: "Sequence No"
+            }
         };
 
         const res = {

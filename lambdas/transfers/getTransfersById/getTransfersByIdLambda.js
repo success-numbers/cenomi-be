@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-
+const constants = require('./constants');
 exports.handler = async (event) => {
     try {
         const seqId = event.queryStringParameters.seqId;
@@ -38,7 +38,8 @@ exports.handler = async (event) => {
 
         const response = {
             transferSeqId: seqId,
-            Items: Items
+            Items: Items,
+            display_name: constants.ColumnMappings        
         };
 
         const res = {

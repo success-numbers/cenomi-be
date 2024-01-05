@@ -1,10 +1,11 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const { validateALLOC, validateGRN, validateDSD } = require('./utilityFunctions');
-const { processALLOC, processGRN, processDSD } = require('./processingFunctions');
+const { processALLOC, processGRN, processDSD, processAlternateALLOC } = require('./processingFunctions');
 
 exports.handler = async (event) => {
     try {
+        console.log("Incoming Event", JSON.stringify(event));
         const payload = JSON.parse(event.body);
         const syncTable = process.env.syncTable;
         const dataTable = process.env.dataTable;
@@ -14,7 +15,7 @@ exports.handler = async (event) => {
             case 'ALLOC':
                 validationResponse = await validateALLOC(payload, dataTable);
                 if (validationResponse.isValid) {
-                    const processingResponse = await processALLOC(payload, syncTable, dataTable);
+                    const processingResponse = await processAlternateALLOC(payload, syncTable, dataTable, validationResponse.barcodeBatches);
                     return generateResponse(processingResponse);
                 } else {
                     return {
@@ -73,6 +74,10 @@ exports.handler = async (event) => {
 
 // Helper function to generate response
 function generateResponse(processingResponse) {
+
+
+    // TODO: Fix the Success Msg and Error Message Criterias.
+    
     if (processingResponse.success) {
         return {
             statusCode: 200,

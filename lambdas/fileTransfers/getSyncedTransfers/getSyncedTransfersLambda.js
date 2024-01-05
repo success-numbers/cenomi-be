@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const constants = require('./constants');
 const {
     transferItemALLOCHandler,
     transferItemGRNHandler,
@@ -61,7 +62,8 @@ exports.handler = async (event) => {
         const mappedData = transferItemUnifiedHandler(syncResult.Items, fileType);
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Data fetched successfully.', fileName:fileName, fileType: fileType, Items: mappedData }),
+            body: JSON.stringify({ message: 'Data fetched successfully.', fileName:fileName, fileType: fileType, Items: mappedData, 
+            "display_name": constants.ColumnMappings }),
         };
     } catch (error) {
         console.error('Error:', error.message);

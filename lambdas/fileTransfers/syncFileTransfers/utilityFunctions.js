@@ -7,18 +7,15 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 async function validateALLOC(payload, dataTable) {
     try {
         const barcodeMap = {};
-
-        for (const boxId in payload.transferBoxes) {
-            const items = payload.transferBoxes[boxId];
-            for (const item of items) {
-                const { barcode, quantity } = item;
-                if (!barcodeMap[barcode]) {
-                    barcodeMap[barcode] = 0;
-                }
-                barcodeMap[barcode] += quantity;
+        const items = payload.items;
+        for (const item of items) {
+            const { barcode, quantity } = item;
+            if (!barcodeMap[barcode]) {
+                barcodeMap[barcode] = 0;
             }
+            barcodeMap[barcode] += quantity;
         }
-
+    
         const barcodes = Object.keys(barcodeMap);
         const batchSize = 25; 
         const batches = [];
@@ -40,7 +37,7 @@ async function validateALLOC(payload, dataTable) {
             };
 
             const batchResult = await dynamoDb.batchGet(params).promise();
-
+            console.log("MEOW 5 batcreseult", batchResult);
             for (const requestedBarcode of batch) {
                 const foundItem = batchResult.Responses[dataTable].find(
                     (item) => item.SK === `ALLOC#BAR#${requestedBarcode}`
@@ -64,7 +61,7 @@ async function validateALLOC(payload, dataTable) {
             }
         }
 
-        return { isValid: true };
+        return { isValid: true, barcodeBatches: batches };
     } catch (error) {
         console.error('Error validating ALLOC payload:', error.message);
         throw new Error(`Error validating ALLOC payload: ${error.message}`);
