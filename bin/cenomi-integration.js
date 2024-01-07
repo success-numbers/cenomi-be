@@ -6,6 +6,7 @@ const { CenomiIntegrationCommonStack } = require('../lib/cenomi-integration-comm
 const { CenomiIntegrationDynamoDbStack } = require('../lib/cenomi-integration-dynamodb-stack');
 const { CenomiIntegrationBusinessStack } = require('../lib/cenomi-integration-business-stack');
 const { CenomiIntegrationLayersStack } = require('../lib/cenomi-integration-layers-stack');
+const { CenomiIntegrationUserManagementStack} = require('../lib/cenomi-integration-usermanagement-stack');
 
 const app = new cdk.App();
 
@@ -62,4 +63,15 @@ new CenomiIntegrationLayersStack(app,`${StackPrefix}layers-stack`,{
   resourcePrefix : projectResourcesPrefix,
   layersData: config.layers,
   env: config.env
+});
+
+new CenomiIntegrationUserManagementStack(app,`${StackPrefix}usermanagement-stack`,{
+  resourcePrefix : projectResourcesPrefix,
+  env: config.env,
+  attributes: config.attributes,
+  roles: config.roles,
+  dbTables: config.dynamoDBTables,
+  allowCrossOrigins: config.allowCrossOrigins,
+  layersData:config.layers,
+  runtime: cdk.aws_lambda.Runtime.NODEJS_18_X
 });

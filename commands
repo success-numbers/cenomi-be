@@ -1,6 +1,7 @@
 cdk deploy --all --profile default  -c deploy-environment=sits
 
-cdk deploy  cenomi-integration-sit-buisness-stack --profile default  -c deploy-environment=sit
-cdk deploy  cenomi-integration-sit-dynamodb-stack --profile default  -c deploy-environment=sit
-cdk deploy  cenomi-integration-sit-dynamodb-stack --profile default  -c deploy-environment=sit
-cdk deploy  cenomi-integration-sit-cognito-stack --profile default  -c deploy-environment=sit
+cdk deploy cenomi-integration-sit-buisness-stack --profile default  -c deploy-environment=sit
+cdk deploy cenomi-integration-sit-dynamodb-stack --profile default  -c deploy-environment=sit
+cdk deploy cenomi-integration-sit-dynamodb-stack --profile default  -c deploy-environment=sit
+cdk deploy cenomi-integration-sit-cognito-stack --profile default  -c deploy-environment=sit
+cdk deploy cenomi-integration-sit-usermanagement-stack --profile default  -c deploy-environment=sit
