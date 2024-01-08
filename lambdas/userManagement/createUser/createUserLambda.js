@@ -4,10 +4,10 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event) => {
   const { userId, email, password, roleId, isDeleted } = JSON.parse(event.body);
 
-  if (!userId || !email || !password || !roleId) {
+  if (!userId || !email || !userName || !password || !roleId) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ message: 'userId, email, password, roleId is required' }),
+      body: JSON.stringify({ message: 'userId, email, password, userName, roleId is required' }),
     };
   }
   try {
@@ -63,6 +63,7 @@ exports.handler = async (event) => {
         PK: email,
         SK: userId,
         roleId: roleId,
+        userName: userName,
         createDate: date,
         entityType: 'USER',
         active: true

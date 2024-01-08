@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
-  const { userId, email, roleId, isActive } = JSON.parse(event.body);
+  const { userId, email, roleId, userName, isActive } = JSON.parse(event.body);
 
   if (!userId) {
     return {
@@ -36,55 +36,38 @@ exports.handler = async (event) => {
         PK: email,
         SK: userId,
       },
-      ConditionExpression: '#pk = :pk and #sk=:sk and #entityType =:entityType'
+      ConditionExpression: '#pk = :pk and #sk=:sk and #entityType =:entityType',
+      ExpressionAttributeNames: {
+        "#entityType": 'entityType',
+        "#pk": 'PK',
+        "#sk": 'SK'
+      },
+      ExpressionAttributeValues: {
+        ":pk": email,
+        ":sk": userId,
+        ":entityType": 'USER'
+      }
     };
 
-    if (roleId !== undefined && isActive !== undefined) {
-      updateParams.UpdateExpression = `SET #roleId = :roleId, #active = :active`;
-      updateParams.ExpressionAttributeNames = {
-        "#active": 'active',
-        "#roleId": 'roleId',
-        "#entityType": 'entityType',
-        "#pk": 'PK',
-        "#sk": 'SK'
-      };
-      updateParams.ExpressionAttributeValues = {
-        ":active": isActive,
-        ":roleId": roleId,
-        ":pk": email,
-        ":sk": userId,
-        ":entityType": 'USER'
-      };
-    } else if (roleId !== undefined && isActive === undefined) {
+    if (roleId !== undefined) {
       updateParams.UpdateExpression = `SET #roleId = :roleId`;
-      updateParams.ExpressionAttributeNames = {
-        "#roleId": 'roleId',
-        "#entityType": 'entityType',
-        "#pk": 'PK',
-        "#sk": 'SK'
-      };
-      updateParams.ExpressionAttributeValues = {
-        ":roleId": roleId,
-        ":pk": email,
-        ":sk": userId,
-        ":entityType": 'USER'
-      };
-    } else if (roleId === undefined && isActive !== undefined) {
-      updateParams.UpdateExpression = `SET #active = :active`;
-      updateParams.ExpressionAttributeNames = {
-        "#active": 'active',
-        "#entityType": 'entityType',
-        "#pk": 'PK',
-        "#sk": 'SK'
-      };
-      updateParams.ExpressionAttributeValues = {
-        ":active": isActive,
-        ":pk": email,
-        ":sk": userId,
-        ":entityType": 'USER'
-      };
-    } else {
+      updateParams.ExpressionAttributeNames["#roleId"] = 'roleId';
+      updateParams.ExpressionAttributeValues[":roleId"] = roleId;
+    }
 
+    if (isActive !== undefined) {
+      updateParams.UpdateExpression = updateParams.UpdateExpression ? `${updateParams.UpdateExpression}, #active = :active` : `SET #active = :active`;
+      updateParams.ExpressionAttributeNames["#active"] = 'active';
+      updateParams.ExpressionAttributeValues[":active"] = isActive;
+    }
+
+    if (userName !== undefined) {
+      updateParams.UpdateExpression = updateParams.UpdateExpression ? `${updateParams.UpdateExpression}, #userName = :userName` : `SET #userName = :userName`;
+      updateParams.ExpressionAttributeNames["#userName"] = 'userName';
+      updateParams.ExpressionAttributeValues[":userName"] = userName;
+    }
+
+    if(updateParams.UpdateExpression === undefined) {
       return {
         statusCode: 400,
         body: JSON.stringify({ message: `No Role/Status change detected from request` })

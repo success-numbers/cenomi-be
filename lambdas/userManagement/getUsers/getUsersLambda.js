@@ -35,6 +35,7 @@ exports.handler = async (event) => {
         finalusers.push({
           userId: user.SK,
           email: user.PK,
+          userName: user.userName ?? user.SK,
           createdBy: user.createdBy,
           createDate: user.createDate,
           updatedBy: user.createDate,
