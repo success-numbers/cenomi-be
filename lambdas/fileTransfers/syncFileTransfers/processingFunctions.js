@@ -6,6 +6,7 @@ async function batchWriteToDynamoDB(tableName, items) {
         const batchRequests = [];
         for (let i = 0; i < items.length; i += 25) {
             const batch = items.slice(i, i + 25);
+            console.log("MEOW BATCH WRITE", JSON.stringify(batch));
             batchRequests.push(
                 dynamoDb.batchWrite({
                     RequestItems: {
@@ -97,6 +98,7 @@ async function processAlternateALLOC(payload, syncTable, dataTable, barcodeBatch
     try {
         const { fileType, fileName, items, asn, boxId } = payload;
         let updateRequests = [];
+        let putRequests = [];
         let barcodeQuantityMap = {};
         for (const batch of barcodeBatches) {
             const params = {
@@ -117,11 +119,11 @@ async function processAlternateALLOC(payload, syncTable, dataTable, barcodeBatch
                 const foundItem = batchResult.Responses[syncTable].find(
                     (item) => item.SK === `BXID#${boxId}#BAR#${requestedBarcode}`
                 );
-
+                const payloadItem = items.find(
+                    (item) => item.barcode === `${requestedBarcode}`
+                );
                 if (!foundItem) {
-                    const payloadItem = items.find(
-                        (item) => item.barcode === `${requestedBarcode}`
-                    );
+                    
                     // New Item to Insert
                     barcodeQuantityMap[requestedBarcode] = {
                         "updatedQty": payloadItem.quantity
@@ -130,7 +132,7 @@ async function processAlternateALLOC(payload, syncTable, dataTable, barcodeBatch
                 }else {
                     // Item Already Exists then merge
                     barcodeQuantityMap[requestedBarcode] = {
-                        "updatedQty": foundItem.quantity ?? 0 + payloadItem.quantity 
+                        "updatedQty": foundItem.quantity + payloadItem.quantity 
                     }
                 }
             }
@@ -148,7 +150,7 @@ async function processAlternateALLOC(payload, syncTable, dataTable, barcodeBatch
                 quantity: barcodeQuantityMap[barcode].updatedQty ?? undefined,
             };
 
-            items.push({ PutRequest: { Item: itemEntry } });
+            putRequests.push({ PutRequest: { Item: itemEntry } });
 
             const updateParams = {
                 TableName: dataTable,
@@ -164,10 +166,10 @@ async function processAlternateALLOC(payload, syncTable, dataTable, barcodeBatch
             };
             updateRequests.push(dynamoDb.update(updateParams).promise());
 
-            if (items.length === 25) {
-                await batchWriteToDynamoDB(syncTable, items);
+            if (putRequests.length === 25) {
+                await batchWriteToDynamoDB(syncTable, putRequests);
                 await Promise.all(updateRequests);
-                items = [];
+                putRequests = [];
                 updateRequests = [];
             }
         }
@@ -178,10 +180,10 @@ async function processAlternateALLOC(payload, syncTable, dataTable, barcodeBatch
         //     }
         // }
 
-        // if (items.length > 0) {
-        //     await batchWriteToDynamoDB(syncTable, items);
-        //     await Promise.all(updateRequests);
-        // }
+        if (putRequests.length > 0) {
+            await batchWriteToDynamoDB(syncTable, putRequests);
+            await Promise.all(updateRequests);
+        }
         return { success: true };
     } catch (error) {
         console.error('Error processing ALLOC payload:', error.message);
@@ -244,6 +246,116 @@ async function processGRN(payload, syncTable, dataTable) {
     }
 }
 
+async function alternateProcessGRN(payload, syncTable, dataTable, barcodeBatches = []) {
+    try {
+        const { fileType, fileName, items, asn, boxId } = payload;
+        let updateRequests = [];
+        let barcodeQuantityMap = {};
+        let putRequests = [];
+
+        for (const batch of barcodeBatches) {
+            const params = {
+                RequestItems: {
+                    [syncTable]: {
+                        Keys: batch.map((barcode) => ({
+                            PK: payload.fileName,
+                            SK: `BXID#${boxId}#BAR#${barcode}`,
+                        })),
+                    },
+                },
+            };
+
+            const batchResult = await dynamoDb.batchGet(params).promise();
+            console.log("MEOW 3 batchresult", JSON.stringify(batchResult));
+
+            for (const requestedBarcode of batch) {
+                const foundItem = batchResult.Responses[syncTable].find(
+                    (item) => item.SK === `BXID#${boxId}#BAR#${requestedBarcode}`
+                );
+                const payloadItem = items.find(
+                    (item) => item.barcode === `${requestedBarcode}`
+                );
+                if (!foundItem) {
+                    // New Item to Insert
+                    barcodeQuantityMap[requestedBarcode] = {
+                        "updatedQty": payloadItem.quantity
+                    }
+                    
+                }else {
+                    // Item Already Exists then merge
+                    barcodeQuantityMap[requestedBarcode] = {
+                        "updatedQty": foundItem.quantity + payloadItem.quantity 
+                    }
+                }
+            }
+        }
+        console.log("MEOW BarcodeQuantity Map", barcodeQuantityMap);
+        for (const item of items) {
+            const { barcode, quantity } = item;
+            
+            const itemEntry = {
+                PK: fileName,
+                SK: `BXID#${boxId}#BAR#${barcode}`,
+                ASN: asn,
+                entityType: 'DETAIL',
+                boxId: boxId,
+                ...item,
+                quantity: barcodeQuantityMap[barcode].updatedQty ?? undefined,
+            };
+
+            putRequests.push({ PutRequest: { Item: itemEntry } });
+
+            if(item.isNew && item.isNew == true){
+                const newPutParams = {
+                    TableName: dataTable,
+                    Item: {
+                        PK: fileName,
+                        SK: `GRN#BAR#${barcode}`,
+                        barcode: barcode,
+                        userId: item?.userId ?? null,
+                        fileType: fileType,
+                        isScanned: true,
+                        pickedQuantity: barcodeQuantityMap[barcode].updatedQty ?? undefined, 
+                        entityType: 'DETAIL'
+                    }, 
+                }
+                updateRequests.push(dynamoDb.put(newPutParams).promise());
+
+            }else {
+                const updateParams = {
+                    TableName: dataTable,
+                    Key: {
+                        PK: fileName,
+                        SK: `GRN#BAR#${barcode}`,
+                    },
+                    UpdateExpression: 'SET pickedQuantity = pickedQuantity + :quantity, isScanned = :scanned',
+                    ExpressionAttributeValues: {
+                        ':quantity': quantity,
+                        ':scanned': true,
+                    },
+                };
+                updateRequests.push(dynamoDb.update(updateParams).promise());
+            }
+
+
+            if (putRequests.length === 25) {
+                await batchWriteToDynamoDB(syncTable, putRequests);
+                await Promise.all(updateRequests);
+                putRequests = [];
+                updateRequests = [];
+            }
+        }
+
+        if (putRequests.length > 0) {
+            await batchWriteToDynamoDB(syncTable, putRequests);
+            await Promise.all(updateRequests);
+        }
+        return { success: true };
+    } catch (error) {
+        console.error('Error processing GRN payload:', error.message);
+        throw new Error(`Error processing GRN payload: ${error.message}`);
+    }
+}
 async function processDSD(payload, syncTable, dataTable) {
     try {
         const { fileType, fileName, transferBoxes, asn } = payload;
@@ -304,5 +416,6 @@ module.exports = {
     processALLOC,
     processGRN,
     processDSD,
-    processAlternateALLOC
+    processAlternateALLOC,
+    alternateProcessGRN
 };

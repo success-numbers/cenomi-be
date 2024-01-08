@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const { validateALLOC, validateGRN, validateDSD } = require('./utilityFunctions');
-const { processALLOC, processGRN, processDSD, processAlternateALLOC } = require('./processingFunctions');
+const { processALLOC, processGRN, processDSD, processAlternateALLOC, alternateProcessGRN } = require('./processingFunctions');
 
 exports.handler = async (event) => {
     try {
@@ -26,12 +26,13 @@ exports.handler = async (event) => {
                 break;
             case 'GRN':
                 if (payload.withValidation !== undefined && payload.withValidation === false) {
-                    const processingResponse = await processGRN(payload, syncTable,dataTable);
+                    validationResponse = await validateGRN(payload, dataTable, payload.withValidation);
+                    const processingResponse = await alternateProcessGRN(payload, syncTable, dataTable, validationResponse.barcodeBatches);
                     return generateResponse(processingResponse);
                 } else {
-                    validationResponse = await validateGRN(payload, dataTable);
+                    validationResponse = await validateGRN(payload, dataTable, payload.withValidation);
                     if (validationResponse.isValid) {
-                        const processingResponse = await processGRN(payload, syncTable, dataTable);
+                        const processingResponse = await alternateProcessGRN(payload, syncTable, dataTable, validationResponse.barcodeBatches);
                         return generateResponse(processingResponse);
                     } else {
                         return {

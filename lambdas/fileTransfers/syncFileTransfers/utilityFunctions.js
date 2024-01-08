@@ -69,26 +69,28 @@ async function validateALLOC(payload, dataTable) {
 }
 
 
-async function validateGRN(payload, dataTable) {
+async function validateGRN(payload, dataTable, validationReqd) {
     try {
-        const barcodes = [];
-
-        
-        for (const boxId in payload.transferBoxes) {
-            const items = payload.transferBoxes[boxId];
-            for (const item of items) {
-                if (!barcodes.includes(item.barcode)) {
-                    barcodes.push(item.barcode);
-                }
+        const barcodeMap = {};
+        const items = payload.items;
+        for (const item of items) {
+            const { barcode, quantity } = item;
+            if (!barcodeMap[barcode]) {
+                barcodeMap[barcode] = 0;
             }
+            barcodeMap[barcode] += quantity;
         }
-        console.log(barcodes);
-        const batchSize = 25;
+    
+        const barcodes = Object.keys(barcodeMap);
+        const batchSize = 25; 
         const batches = [];
         for (let i = 0; i < barcodes.length; i += batchSize) {
             batches.push(barcodes.slice(i, i + batchSize));
         }
         console.log(batches);
+        if(validationReqd == false){
+            return { isValid: true, barcodeBatches: batches };
+        }
       
         for (const batch of batches) {
             const params = {
@@ -119,7 +121,7 @@ async function validateGRN(payload, dataTable) {
             }
         }
 
-        return { isValid: true };
+        return { isValid: true, barcodeBatches: batches };
     } catch (error) {
         console.error('Error validating GRN payload:', error.message);
         throw new Error(`Error validating GRN payload: ${error.message}`);
