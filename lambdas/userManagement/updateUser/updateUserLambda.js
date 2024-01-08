@@ -36,7 +36,7 @@ exports.handler = async (event) => {
         PK: email,
         SK: userId,
       },
-      ConditionExpression: '#pk = :pk and #sk=:sk'
+      ConditionExpression: '#pk = :pk and #sk=:sk and #entityType =:entityType'
     };
 
     if (roleId !== undefined && isActive !== undefined) {
@@ -44,6 +44,7 @@ exports.handler = async (event) => {
       updateParams.ExpressionAttributeNames = {
         "#active": 'active',
         "#roleId": 'roleId',
+        "#entityType": 'entityType',
         "#pk": 'PK',
         "#sk": 'SK'
       };
@@ -51,31 +52,36 @@ exports.handler = async (event) => {
         ":active": isActive,
         ":roleId": roleId,
         ":pk": email,
-        ":sk": userId
+        ":sk": userId,
+        ":entityType": 'USER'
       };
     } else if (roleId !== undefined && isActive === undefined) {
       updateParams.UpdateExpression = `SET #roleId = :roleId`;
       updateParams.ExpressionAttributeNames = {
         "#roleId": 'roleId',
+        "#entityType": 'entityType',
         "#pk": 'PK',
         "#sk": 'SK'
       };
       updateParams.ExpressionAttributeValues = {
         ":roleId": roleId,
         ":pk": email,
-        ":sk": userId
+        ":sk": userId,
+        ":entityType": 'USER'
       };
     } else if (roleId === undefined && isActive !== undefined) {
       updateParams.UpdateExpression = `SET #active = :active`;
       updateParams.ExpressionAttributeNames = {
         "#active": 'active',
+        "#entityType": 'entityType',
         "#pk": 'PK',
         "#sk": 'SK'
       };
       updateParams.ExpressionAttributeValues = {
         ":active": isActive,
         ":pk": email,
-        ":sk": userId
+        ":sk": userId,
+        ":entityType": 'USER'
       };
     } else {
 

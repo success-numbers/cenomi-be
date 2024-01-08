@@ -56,27 +56,27 @@ exports.handler = async (event) => {
     }
 
     const userTable = process.env.userTable;
-
+    const date = Math.floor(new Date().getTime() / 1000);
     const params = {
       TableName: userTable,
       Item: {
         PK: email,
         SK: userId,
         roleId: roleId,
-        createDate: new Date().toISOString(),
+        createDate: date,
         entityType: 'USER',
         active: true
       }
     };
-    console.log('Insert to In progress: ', params);
+    console.log('Insert In progress: ', params);
     await dynamoDb.put(params).promise();
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: `User ${userId} created`, res: res }),
+      body: JSON.stringify({ message: `User ${userId} created` }),
     };
   } catch (e) {
-    console.error('Error fetching destLocIds:', e.message);
+    console.error('Error:', e.message);
     return {
       statusCode: 400,
       body: JSON.stringify({ message: e.message }),
