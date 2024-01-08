@@ -411,11 +411,114 @@ async function processDSD(payload, syncTable, dataTable) {
         throw new Error(`Error processing DSD payload: ${error.message}`);
     }
 }
+async function processAlternateDSD(payload, syncTable, dataTable, inputBoxIdBatches = []) {
+    try {
+        console.log("MEOW 1 processAlternateDSD", JSON.stringify(inputBoxIdBatches));
+        const { fileType, fileName, items, asn, brand } = payload;
+        let updateRequests = [];
+        let putRequests = [];
+        let bxIdQuantityMap = {};
+        for (const batch of inputBoxIdBatches) {
+            const params = {
+                RequestItems: {
+                    [syncTable]: {
+                        Keys: batch.map((inputBoxId) => ({
+                            PK: fileName,
+                            SK: `IBXID#${inputBoxId}`,
+                        })),
+                    },
+                },
+            };
+        console.log("MEOW 2 batches", JSON.stringify(params));
+
+            const batchResult = await dynamoDb.batchGet(params).promise();
+            console.log("MEOW 3 batchresult", JSON.stringify(batchResult));
+
+            for (const requestedBxId of batch) {
+                const foundItem = batchResult.Responses[syncTable].find(
+                    (item) => item.SK === `IBXID#${requestedBxId}`
+                );
+                const payloadItem = items.find(
+                    (item) => item.inputBoxId === `${requestedBxId}`
+                );
+                if (!foundItem) {
+                    // New Item to Insert
+                    bxIdQuantityMap[requestedBxId] = {
+                        "updatedQty": payloadItem.quantity
+                    }
+                    
+                }else {
+                    // Item Already Exists then merge
+                    bxIdQuantityMap[requestedBxId] = {
+                        "updatedQty": foundItem.quantity + payloadItem.quantity 
+                    }
+                }
+            }
+        }
+        for (const item of items) {
+            const { inputBoxId, quantity } = item;
+
+            const itemEntry = {
+                PK: fileName,
+                SK: `IBXID#${inputBoxId}`,
+                ASN: asn,
+                brand: brand,
+                entityType: 'DETAIL',
+                inputBoxId: inputBoxId,
+                scannedBoxId: inputBoxId,
+                ...item,
+                quantity: bxIdQuantityMap[inputBoxId]?.updatedQty ?? undefined,
+            };
+            console.log("MEOW 4 itemEntry", JSON.stringify(itemEntry));
+
+            putRequests.push({ PutRequest: { Item: itemEntry } });
+
+            const updateParams = {
+                TableName: dataTable,
+                Key: {
+                    PK: fileName,
+                    SK: `DSD#IBXID#${inputBoxId}`,
+                },
+                UpdateExpression: 'SET pickedQuantity = pickedQuantity + :quantity, isScanned = :scanned',
+                ExpressionAttributeValues: {
+                    ':quantity': quantity,
+                    ':scanned': true,
+                },
+            };
+            console.log("MEOW 5 updateParams", JSON.stringify(updateParams));
+
+            updateRequests.push(dynamoDb.update(updateParams).promise());
+
+            if (putRequests.length === 25) {
+                await batchWriteToDynamoDB(syncTable, putRequests);
+                await Promise.all(updateRequests);
+                putRequests = [];
+                updateRequests = [];
+            }
+        }
+        // for (const boxId in transferBoxes) {
+        //     if (Object.hasOwnProperty.call(transferBoxes, boxId)) {
+        //         const boxItems = transferBoxes[boxId];
+                
+        //     }
+        // }
+
+        if (putRequests.length > 0) {
+            await batchWriteToDynamoDB(syncTable, putRequests);
+            await Promise.all(updateRequests);
+        }
+        return { success: true };
+    } catch (error) {
+        console.error('Error processing DSD payload:', error.message);
+        throw new Error(`Error processing DSD payload: ${error.message}`);
+    }
+}
 
 module.exports = {
     processALLOC,
     processGRN,
     processDSD,
     processAlternateALLOC,
-    alternateProcessGRN
+    alternateProcessGRN,
+    processAlternateDSD
 };

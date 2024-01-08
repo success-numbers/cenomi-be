@@ -154,6 +154,7 @@ async function processGSD(payload, tableName) {
                         storeCode,
                         inputBoxId,
                         entityType:"DETAIL",
+                        pickedQuantity: 0,
                     },
                 },
             };

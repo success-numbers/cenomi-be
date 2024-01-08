@@ -134,15 +134,15 @@ async function validateDSD(payload, dataTable) {
     try {
         const inputBoxIds = [];
 
-       
-        for (const boxId in payload.transferBoxes) {
-            const items = payload.transferBoxes[boxId];
-            for (const item of items) {
-                if (!inputBoxIds.includes(item.inputBoxId)) {
-                    inputBoxIds.push(item.inputBoxId);
-                }
+        const items = payload.items;
+
+
+        for (const item of items) {
+            if (!inputBoxIds.includes(item.inputBoxId)) {
+                inputBoxIds.push(item.inputBoxId);
             }
         }
+    
 
         const batchSize = 25; 
         const batches = [];
@@ -179,7 +179,7 @@ async function validateDSD(payload, dataTable) {
             }
         }
 
-        return { isValid: true };
+        return { isValid: true, inputBoxIdBatches: batches };
     } catch (error) {
         console.error('Error validating DSD payload:', error.message);
         throw new Error(`Error validating DSD payload: ${error.message}`);
