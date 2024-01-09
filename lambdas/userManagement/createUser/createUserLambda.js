@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
-  const { userId, email, password, roleId, isDeleted } = JSON.parse(event.body);
+  const { userId, email, password, roleId, userName } = JSON.parse(event.body);
 
   if (!userId || !email || !userName || !password || !roleId) {
     return {

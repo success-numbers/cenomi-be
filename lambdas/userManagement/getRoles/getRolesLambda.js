@@ -48,6 +48,7 @@ exports.handler = async (event) => {
     };
 
     const operations = (await dynamoDb.scan(operationsQueryParams).promise()).Items;
+    operations.sort((a, b) => (a.PK > b.PK) ? 1 : ((b.PK > a.PK) ? -1 : 0));
 
     const finalRoles = [];
 
@@ -81,20 +82,37 @@ function hex2bin(hex) {
 
 function getOperationsForRole(roleHexString, operations) {
   let roleOperations = [];
-  for (let i = 0; i < roleHexString.length; i++) {
-    const op = operations.find((op) => op.PK == i);
-    if (op !== undefined && op.active) {
+  operations.forEach(op => {
+    if (roleHexString.charAt(parseInt(op.PK)) !== undefined && roleHexString.charAt(parseInt(op.PK)) !== '') {
       roleOperations.push(
         {
           operationId: op.SK,
           operationDesc: op.operationDesc,
           isActive: op.active,
-          create: hex2bin(roleHexString.charAt(i)).charAt(0) === '1',
-          update: hex2bin(roleHexString.charAt(i)).charAt(1) === '1',
-          read: hex2bin(roleHexString.charAt(i)).charAt(2) === '1',
-          delete: hex2bin(roleHexString.charAt(i)).charAt(3) === '1',
+          create: hex2bin(roleHexString.charAt(parseInt(op.PK))).charAt(0) === '1',
+          read: hex2bin(roleHexString.charAt(parseInt(op.PK))).charAt(1) === '1',
+          update: hex2bin(roleHexString.charAt(parseInt(op.PK))).charAt(2) === '1',
+          delete: hex2bin(roleHexString.charAt(parseInt(op.PK))).charAt(3) === '1',
         }
-      )
+      );
+    } else {
+      roleOperations.push(
+        {
+          operationId: op.SK,
+          operationDesc: op.operationDesc,
+          isActive: op.active,
+          create: false,
+          update: false,
+          read: false,
+          delete: false,
+        }
+      );
+    }
+  });
+  for (let i = 0; i < roleHexString.length; i++) {
+    const op = operations.find((op) => op.PK == i);
+    if (op !== undefined && op.active) {
+
     }
   }
   return roleOperations;
