@@ -88,7 +88,7 @@ exports.handler = async (event) => {
                         const params = {
                             TableName: process.env.tableName,
                             IndexName: "fileType-createdAt-index",
-                            ...utility.buildSearchConstraints(['OPEN', "INPROGRESS", "SUBMITTED"], type, startDate, endDate, lastEvaluatedKey),
+                            ...utility.buildSearchConstraints(['OPEN', "INPROGRESS", "SUBMITTED"], type, startDate, endDate, lastEvaluatedKey, "BRIHEADER"),
                             Limit: limit,
                         };
                 

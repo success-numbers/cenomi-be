@@ -1,4 +1,4 @@
-exports.buildSearchConstraints = (statuses, fileType, startDate, endDate, lastEvaluatedKey = null) => {
+exports.buildSearchConstraints = (statuses, fileType, startDate, endDate, lastEvaluatedKey = null, entityType = "HEADER") => {
     
     let baseFilterExpression = "#st IN (" +
     statuses.map((_, index) => `:status${index}`).join(", ") +
@@ -11,7 +11,7 @@ exports.buildSearchConstraints = (statuses, fileType, startDate, endDate, lastEv
           (acc, status, index) => ({ ...acc, [`:status${index}`]: status }),
           {}
         ),
-        ":entityType": "HEADER",
+        ":entityType": entityType,
       }
 
 
