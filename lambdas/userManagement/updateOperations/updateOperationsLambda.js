@@ -17,7 +17,7 @@ exports.handler = async (event) => {
       TableName: operationsTable,
       Key: {
         PK: seqNo,
-        SK: operationId,
+        SK: seqNo,
       },
       ConditionExpression: '#pk = :pk and #sk = :sk and #entityType =:entityType',
       UpdateExpression: 'SET #desc = :desc, #active = :active, #updatedBy = :updatedBy, #updateDate = :updateDate',
@@ -30,7 +30,7 @@ exports.handler = async (event) => {
       },
       ExpressionAttributeValues: {
         ':pk': seqNo,
-        ':sk': operationId,
+        ':sk': seqNo,
         ':desc': operationDesc,
         ':active': isActive,
         ':updatedBy': updatedBy ?? 'ADMIN',
@@ -40,12 +40,19 @@ exports.handler = async (event) => {
     }
 
     console.log('Update In progress: ', updateParams);
-    await dynamoDb.update(updateParams).promise();
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: `Operation ${operationId} updated` }),
-    };
+    try {
+      await dynamoDb.update(updateParams).promise();
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: `Operation ${operationId} updated` }),
+      };
+    } catch (e) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: `The Operation is not valid.` }),
+      };
+    }
   } catch (e) {
     console.error('Error:', e.message);
     return {

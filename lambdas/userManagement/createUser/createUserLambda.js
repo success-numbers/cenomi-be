@@ -4,12 +4,21 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event) => {
   const { userId, email, password, roleId, userName } = JSON.parse(event.body);
 
-  if (!userId || !email || !userName || !password || !roleId) {
+  if (!userId || !email || !password || !roleId) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ message: 'userId, email, password, userName, roleId is required' }),
+      body: JSON.stringify({ message: 'userId, email, password, roleId is required' }),
     };
   }
+  
+  const pattern = /^[a-zA-Z0-9]*$/;
+  if (!pattern.test(userId)) {
+      return {
+          statusCode: 400,
+          body: JSON.stringify({ message: `Invalid userId: ${userId}. Only Alphanumeric values allowed.` }),
+      };
+  }
+
   try {
     const cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
 
@@ -63,7 +72,7 @@ exports.handler = async (event) => {
         PK: email,
         SK: userId,
         roleId: roleId,
-        userName: userName,
+        userName: userName ?? userId,
         createDate: date,
         entityType: 'USER',
         active: true

@@ -43,12 +43,18 @@ exports.handler = async (event) => {
     }
 
     console.log('Update In progress: ', updateParams);
-    await dynamoDb.update(updateParams).promise();
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: `Role ${roleId} updated` }),
-    };
+    try{
+      await dynamoDb.update(updateParams).promise();
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: `Role ${roleId} updated` }),
+      };
+    } catch (e) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: `The Role is not valid.` }),
+      };
+    }
   } catch (e) {
     console.error('Error:', e.message);
     return {

@@ -10,6 +10,15 @@ exports.handler = async (event) => {
       body: JSON.stringify({ message: 'roleId, role, createdBy is required' }),
     };
   }
+  
+  const pattern = /^[a-zA-Z0-9]*$/;
+  if (!pattern.test(roleId)) {
+      return {
+          statusCode: 400,
+          body: JSON.stringify({ message: `Invalid roleId: ${roleId}. Only Alphanumeric values allowed.` }),
+      };
+  }
+
   try {
     const roleTable = process.env.roleTable;
     const date = Math.floor(new Date().getTime() / 1000)
@@ -23,7 +32,8 @@ exports.handler = async (event) => {
         createDate: date,
         entityType: 'ROLE',
         active: true
-      }
+      },
+      ConditionExpression: 'attribute_not_exists(PK)'
     };
 
     console.log('Insert In progress: ', params);

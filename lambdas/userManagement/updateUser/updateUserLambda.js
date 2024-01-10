@@ -75,12 +75,19 @@ exports.handler = async (event) => {
     }
 
     console.log('Update to In progress: ', updateParams);
-    await dynamoDb.update(updateParams).promise();
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: `User ${userId} updated` }),
-    };
+    try {
+      await dynamoDb.update(updateParams).promise();
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: `User ${userId} updated` }),
+      };
+    } catch (e) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: `User is not valid.` }),
+      };
+    }
   } catch (e) {
     console.error('Error fetching destLocIds:', e.message);
     return {

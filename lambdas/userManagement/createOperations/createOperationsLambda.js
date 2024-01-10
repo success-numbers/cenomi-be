@@ -10,6 +10,15 @@ exports.handler = async (event) => {
       body: JSON.stringify({ message: 'seqNo, operationId, operationDesc is required' }),
     };
   }
+
+  const pattern = /^[0-9]*$/;
+  if (!pattern.test(seqNo)) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: `Invalid SeqNo: ${seqNo}. Only Numeric Values Allowed` }),
+    };
+  }
+
   try {
     const operationsTable = process.env.operationsTable;
     const date = Math.floor(new Date().getTime() / 1000);
@@ -17,12 +26,14 @@ exports.handler = async (event) => {
       TableName: operationsTable,
       Item: {
         PK: seqNo,
-        SK: operationId,
+        SK: seqNo,
+        operationId: operationId,
         operationDesc,
         entityType: 'OPERATION',
         createDate: date,
         active: true
-      }
+      },
+      ConditionExpression: 'attribute_not_exists(PK)'
     };
 
     console.log('Insert In progress: ', params);

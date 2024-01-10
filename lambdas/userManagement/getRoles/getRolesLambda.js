@@ -5,7 +5,7 @@ exports.handler = async (event) => {
   try {
 
     const { roleIds } = event.queryStringParameters ?? {};
-    const pattern = /^[a-zA-Z,]*$/;
+    const pattern = /^[a-zA-Z,0-1]*$/;
     if (!pattern.test(roleIds)) {
       return {
         statusCode: 400,
@@ -77,7 +77,7 @@ exports.handler = async (event) => {
 }
 
 function hex2bin(hex) {
-  return (parseInt(hex, 16).toString(2));
+  return (parseInt(hex, 16).toString(2).padStart(4, '0'));
 }
 
 function getOperationsForRole(roleHexString, operations) {
@@ -86,7 +86,8 @@ function getOperationsForRole(roleHexString, operations) {
     if (roleHexString.charAt(parseInt(op.PK)) !== undefined && roleHexString.charAt(parseInt(op.PK)) !== '') {
       roleOperations.push(
         {
-          operationId: op.SK,
+          seqNo: op.PK,
+          operationId: op.operationId,
           operationDesc: op.operationDesc,
           isActive: op.active,
           create: hex2bin(roleHexString.charAt(parseInt(op.PK))).charAt(0) === '1',
@@ -98,7 +99,8 @@ function getOperationsForRole(roleHexString, operations) {
     } else {
       roleOperations.push(
         {
-          operationId: op.SK,
+          seqNo: op.PK,
+          operationId: op.operationId,
           operationDesc: op.operationDesc,
           isActive: op.active,
           create: false,
