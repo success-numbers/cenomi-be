@@ -7,7 +7,9 @@ const transferItemALLOCHandler = (items) => {
             storeCode: e.storeCode || null,
             boxId: e.boxId || null,
             itemBarcode: e.barcode || null,
-            quantity: e.quantity || null
+            quantity: e.quantity || null,
+            userId: e.userId || null,
+            timestamp: e.timestamp || null  
         }
     });
 }
@@ -21,7 +23,9 @@ const transferItemGRNHandler = (items) => {
             storeCode: e.storeCode || null,
             boxId: e.boxId || null,
             itemBarcode: e.barcode || null,
-            quantity: e.quantity || null
+            quantity: e.quantity || null,
+            userId: e.userId || null,
+            timestamp: e.timestamp || null  
         }
     });
 }
@@ -36,7 +40,9 @@ const transferItemGRNHandler = (items) => {
                 inputBoxId: e.inputBoxId || null,
                 scannedBoxId: e.boxId|| null,
                 quantity: e.quantity || null,
-                status: e.status|| null
+                status: e.status|| null,
+                userId: e.userId || null,
+                timestamp: e.timestamp || null  
             }
         });
     }

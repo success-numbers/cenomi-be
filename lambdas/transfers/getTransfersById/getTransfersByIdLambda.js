@@ -33,7 +33,8 @@ exports.handler = async (event) => {
             timestamp: item.timestamp,
             quantity: item.quantity,
             pickedQuantity: item.pickedQuantity,
-            brand: item.brand
+            brand: item.brand,
+            boxId: item.boxId
         }));
 
         const response = {

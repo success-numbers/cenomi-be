@@ -56,8 +56,10 @@ exports.handler = async (event) => {
         
         const transfers = headerItems.map(item => ({
             transferSeqId: item.PK.split('#')[1], 
-            fromStore: item['fromStore'],
-            fromStoreName: item['fromStoreName'],
+            fromStoreId: item['fromStoreId'],
+            destStoreId: item['destStoreId'],
+            brand: item['brand'],
+            boxId: item['boxId'],
             docNo: item['docNo'],
             docDate: item.timestamp,
             status: item.status 

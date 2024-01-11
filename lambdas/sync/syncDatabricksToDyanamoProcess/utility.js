@@ -27,12 +27,15 @@ exports.fetchChunkDetails = async (items) => {
                     PutRequest: {
                         Item: {
                             PK: `DET#${item[0]}`,
-                            SK: `${item[5]}`,
+                            SK: `${item[7]}`,
                             brand: `${item[1]}`,
+                            fromStoreId: `${item[2]}`,
+                            destStoreId: `${item[3]}`,
                             entityType: `DETAILS`,
-                            quantity: parseInt(item[6], 10),
+                            boxId: `${item[6]}`,
+                            quantity: parseInt(item[8], 10),
                             pickedQuantity: 0,
-                            timestamp: `${item[7]}`
+                            timestamp: `${item[9]}`
                         },          
                         ConditionExpression: 'attribute_not_exists(PK)',
                     },                                  
@@ -93,12 +96,15 @@ exports.fetchChunkDetails = async (items) => {
             headerDataList[itemsDataList[j][0]] = {
                 PK: `HEAD#${itemsDataList[j][0]}`,
                 SK: `HEAD#${itemsDataList[j][0]}`,
-                destId: `${itemsDataList[j][2]}`,
+                destId: `${itemsDataList[j][3]}`,
+                fromStoreId: `${itemsDataList[j][2]}`,
+                destStoreId: `${itemsDataList[j][3]}`,
                 entityType: `HEADER`,
-                docNo: `${itemsDataList[j][3]}`,
-                destIdGSK1: `HEADER#${itemsDataList[j][2]}`,
+                docNo: `${itemsDataList[j][4]}`,
+                destIdGSK1: `HEADER#${itemsDataList[j][3]}`,
                 status: 'OPEN',
-                timestamp: `${itemsDataList[j][7]}`
+                brand: `${itemsDataList[j][1]}`,
+                timestamp: `${itemsDataList[j][9]}`
             }
         }
         for (let i = 0; i < itemsDataList.length; i += batchSize) {

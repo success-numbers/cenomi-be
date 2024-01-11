@@ -60,14 +60,16 @@ exports.handler = async (event) => {
             seqNo: transferId,
             destId: destLocId,
             status: transferDetails.status,
-            fromStore: transferDetails['fromStore'] ?? null,
-            fromStoreName: transferDetails['fromStoreName'] ?? null,
+            fromStoreId: transferDetails['fromStoreId'] ?? null,
+            destStoreId: transferDetails['destStoreId'] ?? null,
             docNo: transferDetails['docNo'],
             createdAt: transferDetails.timestamp,
             display_name: {
                 docNo: "Document No",
                 destId: "StoreId",
                 status: "Status",
+                fromStoreId: "From Store ID",
+                destStoreId: "Dest Store ID",
                 createdAt: "Created At",
                 seqNo: "Sequence No"
             }

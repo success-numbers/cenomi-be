@@ -4,5 +4,6 @@ exports.ColumnMappings = {
   "timestamp": "TimeStamp",
   "quantity": "Quantity",
   "pickedQuantity": "Picked Quantity",
-  "brand": "Brand"
+  "brand": "Brand",
+  "boxId": "Container Id"
 };
