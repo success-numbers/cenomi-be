@@ -444,13 +444,13 @@ async function processAlternateDSD(payload, syncTable, dataTable, inputBoxIdBatc
                 if (!foundItem) {
                     // New Item to Insert
                     bxIdQuantityMap[requestedBxId] = {
-                        "updatedQty": payloadItem.quantity
+                        "updatedQty": 1
                     }
                     
                 }else {
                     // Item Already Exists then merge
                     bxIdQuantityMap[requestedBxId] = {
-                        "updatedQty": foundItem.quantity + payloadItem.quantity 
+                        "updatedQty": 1 
                     }
                 }
             }
@@ -467,7 +467,7 @@ async function processAlternateDSD(payload, syncTable, dataTable, inputBoxIdBatc
                 inputBoxId: inputBoxId,
                 scannedBoxId: inputBoxId,
                 ...item,
-                quantity: bxIdQuantityMap[inputBoxId]?.updatedQty ?? undefined,
+                quantity: bxIdQuantityMap[inputBoxId]?.updatedQty ?? 1,
             };
             console.log("MEOW 4 itemEntry", JSON.stringify(itemEntry));
 
@@ -479,9 +479,9 @@ async function processAlternateDSD(payload, syncTable, dataTable, inputBoxIdBatc
                     PK: fileName,
                     SK: `DSD#IBXID#${inputBoxId}`,
                 },
-                UpdateExpression: 'SET pickedQuantity = pickedQuantity + :quantity, isScanned = :scanned',
+                UpdateExpression: 'SET pickedQuantity = :quantity, isScanned = :scanned',
                 ExpressionAttributeValues: {
-                    ':quantity': quantity,
+                    ':quantity': 1,
                     ':scanned': true,
                 },
             };
