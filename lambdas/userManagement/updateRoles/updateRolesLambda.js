@@ -13,6 +13,7 @@ exports.handler = async (event) => {
 
   try {
     const roleTable = process.env.roleTable;
+    const operationsTable = process.env.operationsTable;
     const date = Math.floor(new Date().getTime() / 1000);
     const updateParams = {
       TableName: roleTable,
@@ -43,13 +44,48 @@ exports.handler = async (event) => {
     }
 
     console.log('Update In progress: ', updateParams);
-    try{
+    try {
       await dynamoDb.update(updateParams).promise();
+
+      const roleQueryParams = {
+        TableName: roleTable,
+        Index: 'EntityTypeIndex',
+        FilterExpression: "entityType = :rolesEntity and PK = :pk",
+        ExpressionAttributeValues: {
+          ":rolesEntity": "ROLE",
+          ":pk": roleId
+        },
+      };
+
+      const queriedRole = (await dynamoDb.scan(roleQueryParams).promise()).Items[0];
+
+      const operationsQueryParams = {
+        TableName: operationsTable,
+        Index: 'EntityTypeIndex',
+        FilterExpression: "entityType = :operationsEntity",
+        ExpressionAttributeValues: {
+          ":operationsEntity": "OPERATION"
+        },
+      };
+
+      const operations = (await dynamoDb.scan(operationsQueryParams).promise()).Items;
+      operations.sort((a, b) => (a.PK > b.PK) ? 1 : ((b.PK > a.PK) ? -1 : 0));
+
+      const finalRole = {
+        roleId: queriedRole.PK,
+        createdBy: queriedRole.createdBy,
+        createDate: queriedRole.createDate,
+        isActive: queriedRole.active,
+        operations: getOperationsForRole(queriedRole.access, operations)
+      }
+
+
       return {
         statusCode: 200,
-        body: JSON.stringify({ message: `Role ${roleId} updated` }),
+        body: JSON.stringify({ finalRole }),
       };
     } catch (e) {
+      console.log(e);
       return {
         statusCode: 400,
         body: JSON.stringify({ message: `The Role is not valid.` }),
@@ -63,4 +99,48 @@ exports.handler = async (event) => {
     };
 
   }
+}
+
+function hex2bin(hex) {
+  return (parseInt(hex, 16).toString(2).padStart(4, '0'));
+}
+
+function getOperationsForRole(roleHexString, operations) {
+  let roleOperations = [];
+  operations.forEach(op => {
+    if (roleHexString.charAt(parseInt(op.PK)) !== undefined && roleHexString.charAt(parseInt(op.PK)) !== '') {
+      roleOperations.push(
+        {
+          seqNo: op.PK,
+          operationId: op.operationId,
+          operationDesc: op.operationDesc,
+          isActive: op.active,
+          create: hex2bin(roleHexString.charAt(parseInt(op.PK))).charAt(0) === '1',
+          read: hex2bin(roleHexString.charAt(parseInt(op.PK))).charAt(1) === '1',
+          update: hex2bin(roleHexString.charAt(parseInt(op.PK))).charAt(2) === '1',
+          delete: hex2bin(roleHexString.charAt(parseInt(op.PK))).charAt(3) === '1',
+        }
+      );
+    } else {
+      roleOperations.push(
+        {
+          seqNo: op.PK,
+          operationId: op.operationId,
+          operationDesc: op.operationDesc,
+          isActive: op.active,
+          create: false,
+          update: false,
+          read: false,
+          delete: false,
+        }
+      );
+    }
+  });
+  for (let i = 0; i < roleHexString.length; i++) {
+    const op = operations.find((op) => op.PK == i);
+    if (op !== undefined && op.active) {
+
+    }
+  }
+  return roleOperations;
 }

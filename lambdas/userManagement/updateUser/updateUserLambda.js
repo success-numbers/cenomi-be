@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
-  const { userId, email, roleId, userName, isActive } = JSON.parse(event.body);
+  const { userId, password, email, roleId, userName, isActive } = JSON.parse(event.body);
 
   if (!userId) {
     return {
@@ -25,6 +25,17 @@ exports.handler = async (event) => {
       } else {
         cognitoRes = await cognitoidentityserviceprovider.adminDisableUser(cognitoUser).promise();
       }
+      console.log('Cognito Response:', cognitoRes);
+    }
+
+    if (password) {
+      const cognitoUser = {
+        UserPoolId: process.env.congnitoUserPoolId,
+        Username: userId,
+        Permanent: true,
+        Password: password,
+      }
+      let cognitoRes = await cognitoidentityserviceprovider.adminSetUserPassword(cognitoUser);
       console.log('Cognito Response:', cognitoRes);
     }
 
@@ -67,7 +78,7 @@ exports.handler = async (event) => {
       updateParams.ExpressionAttributeValues[":userName"] = userName;
     }
 
-    if(updateParams.UpdateExpression === undefined) {
+    if (updateParams.UpdateExpression === undefined) {
       return {
         statusCode: 400,
         body: JSON.stringify({ message: `No Role/Status change detected from request` })
