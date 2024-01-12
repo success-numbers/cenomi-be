@@ -96,12 +96,14 @@ exports.fetchChunkDetails = async (items) => {
             headerDataList[itemsDataList[j][0]] = {
                 PK: `HEAD#${itemsDataList[j][0]}`,
                 SK: `HEAD#${itemsDataList[j][0]}`,
-                destId: `${itemsDataList[j][3]}`,
+                // destId: `${itemsDataList[j][3]}`, TODO: // REAL VALUE
+                destId: `11393`,
                 fromStoreId: `${itemsDataList[j][2]}`,
                 destStoreId: `${itemsDataList[j][3]}`,
                 entityType: `HEADER`,
                 docNo: `${itemsDataList[j][4]}`,
-                destIdGSK1: `HEADER#${itemsDataList[j][3]}`,
+                // destIdGSK1: `HEADER#${itemsDataList[j][3]}`, // REAL VALUE
+                destIdGSK1: `HEADER#11393`,
                 status: 'OPEN',
                 brand: `${itemsDataList[j][1]}`,
                 timestamp: `${itemsDataList[j][9]}`

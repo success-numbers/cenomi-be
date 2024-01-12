@@ -67,7 +67,7 @@ async function processALLOC(payload, syncTable, dataTable) {
                         UpdateExpression: 'SET pickedQuantity = pickedQuantity + :quantity, isScanned = :scanned',
                         ExpressionAttributeValues: {
                             ':quantity': quantity,
-                            ':scanned': true,
+                            ':scanned': "true",
                         },
                     };
                     updateRequests.push(dynamoDb.update(updateParams).promise());
@@ -161,7 +161,7 @@ async function processAlternateALLOC(payload, syncTable, dataTable, barcodeBatch
                 UpdateExpression: 'SET pickedQuantity = pickedQuantity + :quantity, isScanned = :scanned',
                 ExpressionAttributeValues: {
                     ':quantity': quantity,
-                    ':scanned': true,
+                    ':scanned': "true",
                 },
             };
             updateRequests.push(dynamoDb.update(updateParams).promise());
@@ -221,7 +221,7 @@ async function processGRN(payload, syncTable, dataTable) {
                         },
                         UpdateExpression: 'SET isScanned = :scanned',
                         ExpressionAttributeValues: {
-                            ':scanned': true,
+                            ':scanned': "true",
                         },
                     };
                     updateRequests.push(dynamoDb.update(updateParams).promise());
@@ -314,7 +314,7 @@ async function alternateProcessGRN(payload, syncTable, dataTable, barcodeBatches
                         barcode: barcode,
                         userId: item?.userId ?? null,
                         fileType: fileType,
-                        isScanned: true,
+                        isScanned: "true",
                         pickedQuantity: barcodeQuantityMap[barcode].updatedQty ?? undefined, 
                         entityType: 'DETAIL'
                     }, 
@@ -331,7 +331,7 @@ async function alternateProcessGRN(payload, syncTable, dataTable, barcodeBatches
                     UpdateExpression: 'SET pickedQuantity = pickedQuantity + :quantity, isScanned = :scanned',
                     ExpressionAttributeValues: {
                         ':quantity': quantity,
-                        ':scanned': true,
+                        ':scanned': "true",
                     },
                 };
                 updateRequests.push(dynamoDb.update(updateParams).promise());
@@ -387,7 +387,7 @@ async function processDSD(payload, syncTable, dataTable) {
                         },
                         UpdateExpression: 'SET isScanned = :scanned',
                         ExpressionAttributeValues: {
-                            ':scanned': true,
+                            ':scanned': "true",
                         },
                     };
                     updateRequests.push(dynamoDb.update(updateParams).promise());
@@ -482,7 +482,7 @@ async function processAlternateDSD(payload, syncTable, dataTable, inputBoxIdBatc
                 UpdateExpression: 'SET pickedQuantity = :quantity, isScanned = :scanned',
                 ExpressionAttributeValues: {
                     ':quantity': 1,
-                    ':scanned': true,
+                    ':scanned': "true",
                 },
             };
             console.log("MEOW 5 updateParams", JSON.stringify(updateParams));

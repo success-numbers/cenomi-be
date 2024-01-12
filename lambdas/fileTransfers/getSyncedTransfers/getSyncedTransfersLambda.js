@@ -42,19 +42,19 @@ exports.handler = async (event) => {
         const syncResult = await dynamoDb.query(syncParams).promise();
         console.log("MEOW RESULTS", syncResult);
         // Fetch unscanned data from the data table with the given filename where isScanned is false or not defined
-        // const unscannedParams = {
-        //     TableName: dataTable,
-        //     IndexName: 'scnnedIndex',
-        //     KeyConditionExpression: 'PK = :fileName',
-        //     ExpressionAttributeValues: {
-        //         ':fileName': fileName,
-        //         ':scanned': false,
-        //     },
-        //     FilterExpression: 'attribute_not_exists(isScanned) OR isScanned = :scanned',
-        // };
+        const unscannedParams = {
+            TableName: dataTable,
+            IndexName: 'scannedIndex',
+            KeyConditionExpression: 'PK = :fileName AND isScanned=:scanned',
+            ExpressionAttributeValues: {
+                ':fileName': fileName,
+                ':scanned': "false",
+            },
+            // FilterExpression: 'attribute_not_exists(isScanned)',
+        };
 
-        // const unscannedResult = await dynamoDb.query(unscannedParams).promise();
-
+        const unscannedResult = await dynamoDb.query(unscannedParams).promise();
+        console.log("MEOW MOYE 1", JSON.stringify(unscannedResult));
         const combinedResult = syncResult.Items || [];
         // combinedResult.push(...(unscannedResult.Items || []));
 
@@ -63,7 +63,9 @@ exports.handler = async (event) => {
         return {
             statusCode: 200,
             body: JSON.stringify({ message: 'Data fetched successfully.', fileName:fileName, fileType: fileType, Items: mappedData, 
-            "display_name": constants.ColumnMappings }),
+            "display_name": constants.ColumnMappings,
+            "display_csv_col": constants.CSVColumMappings(fileType) 
+        }),
         };
     } catch (error) {
         console.error('Error:', error.message);

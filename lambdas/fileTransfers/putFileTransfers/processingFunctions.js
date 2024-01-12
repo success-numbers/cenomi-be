@@ -47,6 +47,7 @@ async function processALLOC(payload, tableName) {
                         barcode,
                         quantity,
                         brand,
+                        isScanned: "false"
                     },
                 },
             };
@@ -99,6 +100,7 @@ async function processGRN(payload, tableName) {
                         entityType:"DETAIL",
                         pickedQuantity: 0,
                         barcode,
+                        isScanned: "false"
                     },
                 },
             };
@@ -155,6 +157,7 @@ async function processGSD(payload, tableName) {
                         inputBoxId,
                         entityType:"DETAIL",
                         pickedQuantity: 0,
+                        isScanned: "false"
                     },
                 },
             };

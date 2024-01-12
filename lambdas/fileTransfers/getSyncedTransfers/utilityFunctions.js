@@ -38,7 +38,7 @@ const transferItemGRNHandler = (items) => {
                 brand: e.brand || null,
                 storeCode: e.storeCode || null,
                 inputBoxId: e.inputBoxId || null,
-                scannedBoxId: e.boxId|| null,
+                scannedBoxId: e.scannedBoxId|| null,
                 quantity: e.quantity || null,
                 status: e.status|| null,
                 userId: e.userId || null,
