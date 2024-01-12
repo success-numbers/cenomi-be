@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
-  const { userId, email, password, roleId, userName } = JSON.parse(event.body);
+  const { userId, email, password, roleId, userName } = JSON.parse(event.body ?? "{}");
 
   if (!userId || !email || !password || !roleId) {
     return {
@@ -10,13 +10,13 @@ exports.handler = async (event) => {
       body: JSON.stringify({ message: 'userId, email, password, roleId is required' }),
     };
   }
-  
+
   const pattern = /^[a-zA-Z0-9]*$/;
   if (!pattern.test(userId)) {
-      return {
-          statusCode: 400,
-          body: JSON.stringify({ message: `Invalid userId: ${userId}. Only Alphanumeric values allowed.` }),
-      };
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: `Invalid userId: ${userId}. Only Alphanumeric values allowed.` }),
+    };
   }
 
   try {
