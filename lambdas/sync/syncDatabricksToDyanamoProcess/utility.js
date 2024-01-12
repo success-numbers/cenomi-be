@@ -35,6 +35,7 @@ exports.fetchChunkDetails = async (items) => {
                             boxId: `${item[6]}`,
                             quantity: parseInt(item[8], 10),
                             pickedQuantity: 0,
+                            isScanned: "false",
                             timestamp: `${item[9]}`
                         },          
                         ConditionExpression: 'attribute_not_exists(PK)',
