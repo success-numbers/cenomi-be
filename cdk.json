@@ -80,9 +80,9 @@
         "FileTransferDataTable": "FileTransfer-Data",
         "FileTransferSyncTable": "FileTransfer-Sync",
         "FileTransferLockTable": "FileTransfer-Lock",
-        "UsersTable": "UserManagement",
-        "RoleTable": "UserManagement",
-        "OperationsTable": "UserManagement",
+        "UsersTable": "User-Management",
+        "RoleTable": "User-Management",
+        "OperationsTable": "User-Management",
         "ConfigTable": "Config",
         "ChunkTable": "ChunkTable",
         "SyncDataTable": "SyncDataTable"

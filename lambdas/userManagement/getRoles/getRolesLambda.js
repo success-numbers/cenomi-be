@@ -4,7 +4,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event) => {
   try {
 
-    const { roleIds } = event.queryStringParameters ?? {};
+    const { roleIds, limit, paginationToken } = event.queryStringParameters ?? {};
     const pattern = /^[a-zA-Z,0-1]*$/;
     if (!pattern.test(roleIds)) {
       return {
@@ -18,36 +18,44 @@ exports.handler = async (event) => {
 
     const roleQueryParams = {
       TableName: roleTable,
-      Index: 'EntityTypeIndex',
-      FilterExpression: "entityType = :rolesEntity",
+      IndexName: 'EntityTypeIndex',
+      ExclusiveStartKey: !roleIds && paginationToken ? JSON.parse(atob(paginationToken)) : undefined,
+      KeyConditionExpression: "entityType = :rolesEntity",
       ExpressionAttributeValues: {
         ":rolesEntity": "ROLE"
       },
+      Limit: limit ?? parseInt(process.env.defaultLimit ?? 20)
     };
 
     if (roleIds) {
+      roleQueryParams.Limit = undefined;
       let qRoles = roleIds.split(',');
       let qFilter = "";
       for (let i = 0; i < qRoles.length; i++) {
-        qFilter = i === 0 ? `#PK= :role${i}` : `${qFilter} or #PK= :role${i}`;
+        qFilter = i === 0 ? `PK= :role${i}` : `${qFilter} or PK= :role${i}`;
         roleQueryParams.ExpressionAttributeValues[`:role${i}`] = qRoles[i];
       }
-      roleQueryParams.ExpressionAttributeNames = { '#PK': 'PK' }
-      roleQueryParams.FilterExpression = `${roleQueryParams.FilterExpression} and (${qFilter})`
+      roleQueryParams.FilterExpression = qFilter
     }
 
-    const roles = (await dynamoDb.scan(roleQueryParams).promise()).Items;
+    console.log('Getting roles', roleQueryParams);
+
+    const result = (await dynamoDb.query(roleQueryParams).promise());
+    console.log('Got roles', result);
+
+    const currentPaginationToken = result.LastEvaluatedKey ? btoa(JSON.stringify(result.LastEvaluatedKey)) : undefined;
+    const roles = result.Items;
 
     const operationsQueryParams = {
       TableName: operationsTable,
-      Index: 'EntityTypeIndex',
-      FilterExpression: "entityType = :operationsEntity",
+      IndexName: 'EntityTypeIndex',
+      KeyConditionExpression: "entityType = :operationsEntity",
       ExpressionAttributeValues: {
         ":operationsEntity": "OPERATION"
       },
     };
 
-    const operations = (await dynamoDb.scan(operationsQueryParams).promise()).Items;
+    const operations = (await dynamoDb.query(operationsQueryParams).promise()).Items;
     operations.sort((a, b) => (a.PK > b.PK) ? 1 : ((b.PK > a.PK) ? -1 : 0));
 
     const finalRoles = [];
@@ -64,7 +72,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ roles: finalRoles }),
+      body: JSON.stringify({ paginationToken: currentPaginationToken, roles: finalRoles }),
     };
   } catch (e) {
     console.error('Error:', e.message);

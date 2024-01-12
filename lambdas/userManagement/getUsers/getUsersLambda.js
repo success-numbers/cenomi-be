@@ -4,20 +4,23 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event) => {
   try {
 
-    const { userIds } = event.queryStringParameters ?? {};
+    const { userIds, paginationToken, limit } = event.queryStringParameters ?? {};
 
     const userTable = process.env.userTable;
 
     const userQueryParams = {
       TableName: userTable,
-      Index: 'EntityTypeIndex',
-      FilterExpression: "entityType = :usersEntity",
+      IndexName: 'EntityTypeIndex',
+      KeyConditionExpression: "entityType = :usersEntity",
+      ExclusiveStartKey: !userIds && paginationToken ? JSON.parse(atob(paginationToken)) : undefined,
       ExpressionAttributeValues: {
         ":usersEntity": "USER"
       },
+      Limit: limit ?? parseInt(process.env.defaultLimit ?? 20)
     };
 
     if (userIds) {
+      userQueryParams.Limit = undefined;
       let qusers = userIds.split(',');
       let qFilter = "";
       for (let i = 0; i < qusers.length; i++) {
@@ -25,10 +28,14 @@ exports.handler = async (event) => {
         userQueryParams.ExpressionAttributeValues[`:user${i}`] = qusers[i];
       }
       userQueryParams.ExpressionAttributeNames = { '#PK': 'PK', '#SK': 'SK' }
-      userQueryParams.FilterExpression = `${userQueryParams.FilterExpression} and (${qFilter})`
+      userQueryParams.FilterExpression = qFilter
     }
 
-    const users = (await dynamoDb.scan(userQueryParams).promise()).Items;
+
+    const result = (await dynamoDb.query(userQueryParams).promise());
+    const users = result.Items;
+    const currentPaginationToken = result.LastEvaluatedKey ? btoa(JSON.stringify(result.LastEvaluatedKey)) : undefined;
+
     const finalusers = [];
     users.forEach(user => {
       if (user.active) {
@@ -48,7 +55,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ users: finalusers }),
+      body: JSON.stringify({ paginationToken: currentPaginationToken, users: finalusers }),
     };
   } catch (e) {
     console.error('Error:', e.message);
