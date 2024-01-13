@@ -42,24 +42,32 @@ exports.handler = async (event) => {
         const syncResult = await dynamoDb.query(syncParams).promise();
         console.log("MEOW RESULTS", syncResult);
         // Fetch unscanned data from the data table with the given filename where isScanned is false or not defined
-        const unscannedParams = {
-            TableName: dataTable,
-            IndexName: 'scannedIndex',
-            KeyConditionExpression: 'PK = :fileName AND isScanned=:scanned',
-            ExpressionAttributeValues: {
-                ':fileName': fileName,
-                ':scanned': "false",
-            },
-            // FilterExpression: 'attribute_not_exists(isScanned)',
-        };
+        let combinedResult = syncResult.Items || [];
+        let mappedDSDItems = []
+;        if(fileType == "DSD"){
+            const unscannedParams = {
+                TableName: dataTable,
+                IndexName: 'scannedIndex',
+                KeyConditionExpression: 'PK = :fileName AND isScanned=:scanned',
+                ExpressionAttributeValues: {
+                    ':fileName': fileName,
+                    ':scanned': "false",
+                },
+                // FilterExpression: 'attribute_not_exists(isScanned)',
+            };
+            const unscannedResult = await dynamoDb.query(unscannedParams).promise();
+            console.log("Items which has been scanned", JSON.stringify(unscannedResult));
+            if(unscannedResult.Items && unscannedResult.Count > 0){
+                mappedDSDItems = [...transferItemDSDHandler(unscannedResult.Items)];
+            }
 
-        const unscannedResult = await dynamoDb.query(unscannedParams).promise();
-        console.log("MEOW MOYE 1", JSON.stringify(unscannedResult));
-        const combinedResult = syncResult.Items || [];
+        }
+       
         // combinedResult.push(...(unscannedResult.Items || []));
 
         // Map the combined data based on transfer type
-        const mappedData = transferItemUnifiedHandler(syncResult.Items, fileType);
+        let mappedData = transferItemUnifiedHandler(syncResult.Items, fileType);
+        mappedData = [...mappedData, ...mappedDSDItems];
         return {
             statusCode: 200,
             body: JSON.stringify({ message: 'Data fetched successfully.', fileName:fileName, fileType: fileType, Items: mappedData, 

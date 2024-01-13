@@ -103,7 +103,7 @@ exports.CSVColumMappings =  (fileType) => {
           "displayName":  "QTY"  
         },
         {
-          "key": "isScanned",
+          "key": "status",
           "displayName":  "Status"  
         }
       ];
