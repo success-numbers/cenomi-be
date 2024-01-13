@@ -30,7 +30,7 @@ exports.handler = async (event) => {
         }
         console.log("STATUSES", statuses);
         if(statuses.includes("ALL")){
-            statuses = ['OPEN', 'INPROGRESS', 'SUBMIMTTED'];
+            statuses = ['OPEN', 'INPROGRESS', 'SUBMITTED'];
         }
         switch(type){
             case "ALL": {

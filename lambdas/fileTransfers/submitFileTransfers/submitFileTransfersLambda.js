@@ -1,64 +1,133 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-
+const deleteUserLock = async (lockTable, fileName, key) => {
+    const deleteParam = {
+        TableName: lockTable,
+        Key: {
+          PK: `${fileName}`,
+          SK: `${key}`,
+        },
+      };
+    await dynamoDb.delete(deleteParam).promise();
+    console.log("Delete User Lock from DB", key);
+}
 exports.handler = async (event) => {
     try {
-        const { userId, fileName, fileType, timestamp } = JSON.parse(event.body);
-        if (!userId || !fileName || !fileType || !timestamp) {
+        const { userId, fileName, fileType, timestamp, key, force = false } = JSON.parse(event.body);
+        if (!userId || !fileName || !fileType || !timestamp || !key) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'userId, fileName, fileType, and timestamp are required.' }),
+                body: JSON.stringify({ message: 'key, userId, fileName, fileType, and timestamp are required.' }),
             };
         }
-        await updateHeaderStatus(fileName, process.env.dataTable);
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Picking is in progress by another user.' }),
-        };
-        // TODO: Locking Mechanism 
-        const lockTbale = process.env.lockTbale;
+
+        // return {
+        //     statusCode: 200,
+        //     body: JSON.stringify({ message: 'Picking is in progress by another user.' }),
+        // };
+        // TODO: Releasing Mechanism 
+        // await updateHeaderStatus(fileName, process.env.dataTable);
+
+        const fileTransferLockTable = process.env.lockTable;
         const fileTransferDataTable = process.env.dataTable;
 
-        const auditQueryParams = {
-            TableName: lockTbale,
+        const existingLockUserDetails = {
+            TableName: fileTransferLockTable,
             KeyConditionExpression: 'PK = :pk',
             ExpressionAttributeValues: {
-                ':pk': fileName,
+                ':pk': fileName            
             },
-            ScanIndexForward: false,
         };
 
-        const auditQueryResult = await dynamoDb.query(auditQueryParams).promise();
+        const existingLocksForTsf = await dynamoDb.query(existingLockUserDetails).promise();
+        
+        //FILE TSFs
+        if (existingLocksForTsf.Count > 0) {
+            const currentUserLock = existingLocksForTsf.Items.find((element) => element.SK == key);
+            if(existingLocksForTsf.Count > 1){
+                if(currentUserLock != null){
+                    try{
+                        await deleteUserLock(fileTransferLockTable, fileName, key);
+                        console.log("Delete User Lock from DB", key);
+                    }catch(e){
+                        return {
+                            statusCode: 500,
+                            body: JSON.stringify({ 
+                                message: `Error! ${e}` 
+                            }),
+                        };
+                    }
 
-        if (auditQueryResult.Count > 0) {
-            const latestAuditEntry = auditQueryResult.Items[0];
-
-            if (latestAuditEntry.userId === userId) {
-                await updateHeaderStatus(fileName, fileTransferDataTable);
-                await deleteAuditEntries(fileName, lockTbale);
-
+                }
+                if(force){
+                    await updateHeaderStatus(fileName, process.env.dataTable);
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify({ 
+                            code: "E00001",
+                            message: 'Successfully Submitted Transfer.' 
+                        }),
+                    };
+                }
                 return {
                     statusCode: 200,
-                    body: JSON.stringify({ message: `Status updated to SUBMITTED for ${fileType}.` }),
+                    body: JSON.stringify({ 
+                        code: "E02001",
+                        message: 'Picking is still inprogress by another users.' 
+                    }),
                 };
+            }else if(existingLocksForTsf.Count == 1 && currentUserLock != null ){
+                // This is the last user to submit
+                //Check UnScanned Items ->  For File Tsf not sure
+                await updateHeaderStatus(fileName, process.env.dataTable);
+                try{
+                    await deleteUserLock(fileTransferLockTable, fileName, key);
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify({ 
+                            message: 'Successfully Submitted Transfer.' 
+                        }),
+                    };
+                }catch(e){
+                    return {
+                        statusCode: 500,
+                        body: JSON.stringify({ 
+                            message: `Error! ${e}` 
+                        }),
+                    };
+                }
             } else {
+                if(force){
+                    await updateHeaderStatus(fileName, process.env.dataTable);
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify({ 
+                            code: "E00001",
+                            message: 'Successfully Submitted Transfer.' 
+                        }),
+                    };
+                }
                 return {
                     statusCode: 200,
-                    body: JSON.stringify({ message: 'Picking is in progress by another user.' }),
+                    body: JSON.stringify({ 
+                        code: "E02001",
+                        message: 'Picking is still inprogress by another users.' 
+                    }),
                 };
             }
+
+        
         } else {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'No audit entries found for the given fileName.' }),
+                body: JSON.stringify({ message: 'No Lock entries found for the given fileName.' }),
             };
         }
     } catch (error) {
-        console.error('Error:', error.message);
-
+        console.error('Error:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: `Internal server error: ${error.message}` }),
+            body: JSON.stringify({ message: `Error! ${error.toString()}` }),
         };
     }
 };
@@ -84,38 +153,5 @@ async function updateHeaderStatus(fileName, dataTable) {
     } catch (error) {
         console.error('Update Header Status Error:', error.message);
         throw new Error(`Update Header Status Error: ${error.message}`);
-    }
-}
-
-async function deleteAuditEntries(fileName, lockTbale) {
-    const queryParams = {
-        TableName: lockTbale,
-        KeyConditionExpression: 'PK = :pk',
-        ExpressionAttributeValues: {
-            ':pk': fileName,
-        },
-    };
-
-    try {
-        const queryResult = await dynamoDb.query(queryParams).promise();
-
-       
-        const deletePromises = queryResult.Items.map(async (item) => {
-            const deleteParams = {
-                TableName: lockTbale,
-                Key: {
-                    PK: item.PK,
-                    SK: item.SK,
-                },
-                ConditionExpression: 'attribute_exists(PK)', 
-            };
-
-            return dynamoDb.delete(deleteParams).promise();
-        });
-
-        await Promise.all(deletePromises);
-    } catch (error) {
-        console.error('Delete Audit Entries Error:', error.message);
-        throw new Error(`Delete Audit Entries Error: ${error.message}`);
     }
 }
