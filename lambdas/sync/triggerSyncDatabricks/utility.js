@@ -4,7 +4,7 @@ exports.databricksApi = async (timestamp) => {
     const databricksEndpoint = 'https://adb-218500037178863.3.azuredatabricks.net/api/2.0/sql/statements/';
     const databricksToken = 'Bearer dapi403f06fb4fd99ee03377165e3984db86'; // Replace with your Databricks token
 
-    const sqlStatement = `select * from fin_recon.cenomi_app.movement where Insert_Datetime > '${timestamp}' LIMIT 10;`;
+    const sqlStatement = `select mov.*, sm.Store_Name from fin_recon.cenomi_app.movement mov LEFT JOIN fin_recon.cenomi_app.v_store_master sm on mov.From_Store_Id = sm.BP_Store_Id AND mov.Brand_Id = sm.Brand_Id where Insert_Datetime > '${timestamp}' LIMIT 400;`;
     const queryPayload = {  
         statement: sqlStatement,
         warehouse_id: '7d5e01a202a675ca',

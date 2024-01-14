@@ -31,6 +31,7 @@ exports.fetchChunkDetails = async (items) => {
                             brand: `${item[1]}`,
                             fromStoreId: `${item[2]}`,
                             destStoreId: `${item[3]}`,
+                            fromStoreDesc: `${item[10]}`,
                             entityType: `DETAILS`,
                             boxId: `${item[6]}`,
                             quantity: parseInt(item[8], 10),
@@ -106,6 +107,7 @@ exports.fetchChunkDetails = async (items) => {
                 // destIdGSK1: `HEADER#${itemsDataList[j][3]}`, // REAL VALUE
                 destIdGSK1: `HEADER#11393`,
                 status: 'OPEN',
+                fromStoreDesc: `${itemsDataList[j][10]}`,
                 brand: `${itemsDataList[j][1]}`,
                 timestamp: `${itemsDataList[j][9]}`
             }

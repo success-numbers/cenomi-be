@@ -40,7 +40,7 @@ const transferItemGRNHandler = (items) => {
                 inputBoxId: e.inputBoxId || null,
                 scannedBoxId: e.scannedBoxId|| null,
                 quantity: e.quantity || 0,
-                status: ((e?.quantity || 0) > 0) ? "Received": "Missing",
+                status: ((e?.quantity || 0) > 0) ? "Received": "Missing Box",
                 userId: e.userId || null,
                 timestamp: e.timestamp || null  
             }

@@ -14,6 +14,33 @@ const deleteUserLock = async (lockTable, tsfSeqNo, key) => {
     console.log("Delete User Lock from DB", key);
 }
 
+const getShortageItems = async (tsfSeqNo) => {
+    // const qParams = {
+    //     TableName: process.env.tableName,
+    //     IndexName: 'statusTsfSeqNoIndex',
+    //     KeyConditionExpression: "#st = :status AND PK = :tsfSeq",
+    //     ExpressionAttributeValues: {
+    //         ':status': `false`,
+    //         ':tsfSeq': tsfSeqNo
+    //     },
+    //     ExpressionAttributeNames: {'#st': 'status'}
+    // };
+    const params = {
+        TableName: process.env.tableName,
+        KeyConditionExpression: 'PK = :pkVal',
+        FilterExpression: 'pickedQuantity < quantity',
+        ExpressionAttributeValues: {
+            ':pkVal': `DET#${tsfSeqNo}`,
+        },
+    };
+    const getNonScannedItems = await dynamoDb.query(params).promise();
+    if(getNonScannedItems && getNonScannedItems.Count > 0){
+        return getNonScannedItems.Items ?? [];
+    }else{
+        return [];
+    }
+}
+
 const updateHeaderInditexDataTable = async (transferSeqId) => {
     try{
     const updateParams = {
@@ -104,24 +131,43 @@ exports.handler = async (event) => {
                     };
                 }else if(existingLocksForTsf.Count == 1 && currentUserLock != null ){
                     // This is the last user to submit
-                    //Check UnScanned Items ->  For File Tsf not sure
-                    await updateHeaderInditexDataTable(transferSeqId);
-                    try{
-                        await deleteUserLock(fileTransferLockTable, transferSeqId, key);
-                        return {
-                            statusCode: 200,
-                            body: JSON.stringify({ 
-                                message: 'Successfully Submitted Transfer.' 
-                            }),
-                        };
-                    }catch(e){
-                        return {
-                            statusCode: 500,
-                            body: JSON.stringify({ 
-                                message: `Error! ${e}` 
-                            }),
-                        };
+                    //Check UnScanned Items ->  For Inditex
+                    const shortageItemsList = await getShortageItems(transferSeqId);
+                    console.log("Shortage Items for the Tsf", JSON.stringify(shortageItemsList));
+                    if(shortageItemsList.length == 0 || (shortageItemsList.length > 0 && force)){
+                        // No Shoratge Items Present. Submit Successfully
+                        await updateHeaderInditexDataTable(transferSeqId);
+                        try{
+                            await deleteUserLock(fileTransferLockTable, transferSeqId, key);
+                            return {
+                                statusCode: 200,
+                                body: JSON.stringify({ 
+                                    message: 'Successfully Submitted Transfer.' 
+                                }),
+                            };
+                        }catch(e){
+                            return {
+                                statusCode: 500,
+                                body: JSON.stringify({ 
+                                    message: `Error! ${e}` 
+                                }),
+                            };
+                        }
                     }
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify({ 
+                            code: "E00003",
+                            message: 'Shortage Items Present',
+                            data: shortageItemsList.map((e) => {
+                                return {
+                                    "barcode": e.SK,
+                                    "shortageQty": (e?.quantity ?? 0) - (e?.pickedQuantity ?? 0)
+                                }
+                            })
+                        }),
+                    };
+                    
                 } else {
                     if(force){
                         await updateHeaderInditexDataTable(transferSeqId);
