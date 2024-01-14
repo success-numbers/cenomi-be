@@ -56,9 +56,11 @@ exports.handler = async (event) => {
                 // FilterExpression: 'attribute_not_exists(isScanned)',
             };
             const unscannedResult = await dynamoDb.query(unscannedParams).promise();
+            const asn = syncResult.Count > 0 ? syncResult.Items[0]?.ASN : null;
+            const brand = syncResult.Count > 0 ? syncResult.Items[0]?.brand : null;
             console.log("Items which has been scanned", JSON.stringify(unscannedResult));
             if(unscannedResult.Items && unscannedResult.Count > 0){
-                mappedDSDItems = [...transferItemDSDHandler(unscannedResult.Items)];
+                mappedDSDItems = [...transferItemDSDHandler(unscannedResult.Items, asn, brand)];
             }
 
         }

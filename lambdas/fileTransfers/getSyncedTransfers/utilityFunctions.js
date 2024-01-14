@@ -31,11 +31,11 @@ const transferItemGRNHandler = (items) => {
 }
 
 // Mapper for DSD type
-    const transferItemDSDHandler = (items) => {
+    const transferItemDSDHandler = (items, asn = null, brand = null) => {
         return items.map((e) => {
             return {
-                asn: e.ASN || null,
-                brand: e.brand || null,
+                asn: e.ASN || asn || null,
+                brand: e.brand || brand || null,
                 storeCode: e.storeCode || null,
                 inputBoxId: e.inputBoxId || null,
                 scannedBoxId: e.scannedBoxId|| null,

@@ -3,28 +3,33 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
     try {
+        console.log("Incoming LOV API Event", event);
+        const { valueType = null } = event.queryStringParameters;
+        if(!valueType) {
+            throw "valueType is required";
+        }
         let params = {
             TableName: process.env.configTable,
-            KeyConditionExpression: `PK = :fileName and SK = :sk`,
+            KeyConditionExpression: `PK = :valueType and SK = :sk`,
             ExpressionAttributeValues: {
-                ':fileName': "WAREHOUSES",
+                ':valueType': valueType,
                 ':sk': "ALL"
             },
         };
 
         const response = await dynamoDb.query(params).promise();
         if(response && response.Count > 0){
-            const apiResp = {
-                destLocIds: response.Items[0].data,
-                count: response.Count
-            }
+            // const apiResp = {
+            //     destLocIds: response.Items[0].data,
+            //     count: response.Count
+            // }
             const res = {
                 statusCode: 200,
                 headers: {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*',
                 },
-                body: JSON.stringify(apiResp),
+                body: JSON.stringify(response.Items[0].data ?? []),
             };
             return res;
         }else{
@@ -50,14 +55,14 @@ exports.handler = async (event) => {
         //     body: JSON.stringify(response),
         // };
     } catch (e) {
-        console.error('Error fetching destLocIds:', e.message);
+        console.error('Error fetching Lov:', e.toString());
         const res = {
             statusCode: 500,
             headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify({ "message": "Internal server error" }),
+            body: JSON.stringify({ "message": `Error! ${e.toString()}` }),
         };
         return res;
     }
