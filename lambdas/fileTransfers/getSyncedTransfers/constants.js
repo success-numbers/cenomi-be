@@ -1,5 +1,5 @@
 exports.ColumnMappings = {
-  asn: "ASN",
+  asn: "Asn",
   brand: "Brand",
   storeCode: "Store Code",
   boxId: "BoxId",

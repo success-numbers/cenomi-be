@@ -1,3 +1,21 @@
+const constants = require('./constants');
+
+const convertToReadableDateTime = (timestamp) => {
+    // Check if timestamp is null
+    if (timestamp === null || timestamp == undefined) {
+        return null;
+    }
+
+    // Create a Date object from the timestamp
+    const dateTime = new Date(timestamp);
+
+    // Format the date-time as a string in DD/MM/YYYY, h:mm:ss A format
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
+    const readableDateTime = dateTime.toLocaleString(options);
+
+    return readableDateTime;
+}
+
 exports.buildSearchConstraints = (statuses, fileType, startDate, endDate, lastEvaluatedKey = null, entityType = "HEADER") => {
     
     let baseFilterExpression = "#st IN (" +
@@ -101,10 +119,10 @@ exports.dbTransformMapper = (items) => {
             "entityType": e.entityType,
             "fileType": e.fileType,
             "userId": e.userId,
-            "status": e.status,
+            "status": constants.statusDispMapper(e.status),
             "asn": e.asn ?? null,
-            "createdAt": e.createdAt,
-            "updatedAt": e.updatedAt ?? null
+            "createdAt": convertToReadableDateTime(e.createdAt),
+            "updatedAt": convertToReadableDateTime(e.updatedAt) ?? null
         };
     })
     return reqdItemsList;

@@ -1,5 +1,5 @@
 exports.ColumnMappings  = {
-        "userId" : "USER ID",
+        "userId" : "User ID",
         "fileName": "File Name",
         "fileType": "File Type",
         "status": "Status",

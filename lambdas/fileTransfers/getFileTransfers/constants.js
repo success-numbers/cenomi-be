@@ -1,9 +1,21 @@
 exports.ColumnMappings  = {
-        "userId" : "USER ID",
+        "userId" : "User",
         "fileName": "File Name",
         "fileType": "File Type",
         "status": "Status",
         "asn": "ASN",
-        "createdAt": "Created At",
-        "updatedAt": "Updated At"
+        "createdAt": "Create Date",
+        "updatedAt": "Update Date"
+}
+
+exports.statusDispMapper = (status) => {
+        const map = {
+                "OPEN": "Open",
+                "INPROGRESS": "In Progress",
+                "SUBMITTED": "Submitted"
+        }
+        if(map[status] != undefined){
+                return map[status];
+        }
+        return status;
 }

@@ -69,9 +69,18 @@ exports.handler = async (event) => {
                         }),
                     };
                 }
+
+                // Get Pending Users from DB
+                const existingPendingUsers = existingLocksForTsf.Items.filter((user) => user.SK != key);
                 return {
                     statusCode: 200,
                     body: JSON.stringify({ 
+                        data : existingPendingUsers.map((e) =>{
+                            return {
+                                "deviceId": e.deviceId,
+                                "userId": e.userId
+                            }
+                        }),
                         code: "E02001",
                         message: 'Picking is still inprogress by another users.' 
                     }),
@@ -107,10 +116,18 @@ exports.handler = async (event) => {
                         }),
                     };
                 }
+                  // Get Pending Users from DB
+                const existingPendingUsers = existingLocksForTsf.Items.filter((user) => user.SK != key);
                 return {
                     statusCode: 200,
                     body: JSON.stringify({ 
                         code: "E02001",
+                        data : existingPendingUsers.map((e) =>{
+                            return {
+                                "deviceId": e.deviceId,
+                                "userId": e.userId
+                            }
+                        }),
                         message: 'Picking is still inprogress by another users.' 
                     }),
                 };
