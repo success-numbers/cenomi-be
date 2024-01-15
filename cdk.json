@@ -14,7 +14,6 @@
       "test"
     ]
   },
-  
   "context": {
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
     "@aws-cdk/core:checkSecretUsage": true,
@@ -68,7 +67,6 @@
         "account": "458980468763",
         "region": "ap-south-1"
       },
-      
       "attributes": {
         "masterApiGateway": {
           "stageName": "sit",
@@ -82,6 +80,9 @@
         "FileTransferDataTable": "FileTransfer-Data",
         "FileTransferSyncTable": "FileTransfer-Sync",
         "FileTransferLockTable": "FileTransfer-Lock",
+        "UsersTable": "User-Management",
+        "RoleTable": "User-Management",
+        "OperationsTable": "User-Management",
         "ConfigTable": "Config",
         "ChunkTable": "ChunkTable",
         "SyncDataTable": "SyncDataTable"
@@ -91,31 +92,31 @@
           "name": "NPMPackagesLayer",
           "version": "1"
         },
-        "modelsLayer": {
-        }
+        "modelsLayer": {}
       },
       "vpc": {
         "retail": "vpc-03b9c564"
       },
-      "securityGroups" : {
+      "securityGroups": {
         "SG": "sg-0666b19beab549604"
       },
-      "subnets": [{
-        "subnet_id": "subnet-eda0faa4"
-      }],
-      "roles" : {
+      "subnets": [
+        {
+          "subnet_id": "subnet-eda0faa4"
+        }
+      ],
+      "roles": {
         "role_1": "role/cloud9-oms-verifyorderRole-1GVXMF164068H"
       },
       "allowCrossOrigins": [
         "https://d35vw099ooesiq.amplifyapp.com",
         "https://enhancecl.d35vw099ooesiq.amplifyapp.com",
         "https://enhance.d35vw099ooesiq.amplifyapp.com",
-        "http://localhost:3000", 
+        "http://localhost:3000",
         "http://localhost:3001",
-        "https://sit.d35vw099ooesiq.amplifyapp.com", 
+        "https://sit.d35vw099ooesiq.amplifyapp.com",
         "https://uat.dlpnhy99scsgh.amplifyapp.com"
-    ]
-
+      ]
     }
   }
 }

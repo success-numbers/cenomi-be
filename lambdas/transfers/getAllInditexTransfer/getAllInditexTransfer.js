@@ -16,7 +16,7 @@ exports.handler = async (event) => {
     try {
 
         const { lastEvaluatedKey, limit, status } = event.queryStringParameters;
-        const pattern = /^[a-zA-Z,]*$/;
+        const pattern = /^[a-zA-Z]*$/;
         if (!pattern.test(status)) {
             return {
                 statusCode: 400,
