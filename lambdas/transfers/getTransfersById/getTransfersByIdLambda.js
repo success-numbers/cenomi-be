@@ -1,6 +1,32 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const constants = require('./constants');
+const convertToReadableDateTime = (timestamp, targetTimeZone = "Asia/Riyadh") => {
+    // Check if timestamp is null
+    if (timestamp === null || timestamp === undefined) {
+        return null;
+    }
+
+    // Create a Date object from the timestamp
+    const dateTime = new Date(timestamp);
+
+    // Convert to the target timezone
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: true,
+        timeZone: targetTimeZone,
+    };
+
+    const readableDateTime = dateTime.toLocaleString('en-US', options);
+
+    return readableDateTime;
+};
+
 exports.handler = async (event) => {
     try {
         const seqId = event.queryStringParameters.seqId;
@@ -30,7 +56,7 @@ exports.handler = async (event) => {
         const Items = result.Items.map(item => ({
             itemSeqId: seqId,
             barcode: item.SK,
-            timestamp: item.timestamp,
+            timestamp: convertToReadableDateTime(item.timestamp, "Asia/Riyadh"),
             quantity: item.quantity,
             pickedQuantity: item.pickedQuantity,
             brand: item.brand,

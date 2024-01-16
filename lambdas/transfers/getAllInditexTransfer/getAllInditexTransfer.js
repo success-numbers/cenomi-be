@@ -1,6 +1,33 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
+const convertToReadableDateTime = (timestamp, targetTimeZone = "Asia/Riyadh") => {
+    // Check if timestamp is null
+    if (timestamp === null || timestamp === undefined) {
+        return null;
+    }
+
+    // Create a Date object from the timestamp
+    const dateTime = new Date(timestamp);
+
+    // Convert to the target timezone
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: true,
+        timeZone: targetTimeZone,
+    };
+
+    const readableDateTime = dateTime.toLocaleString('en-US', options);
+
+    return readableDateTime;
+};
+
+
 const statusDispMapper = (status) => {
     const map = {
             "OPEN": "Open",
@@ -20,7 +47,7 @@ const dbItemMapper = (item) => {
         docNo: item.docNo,
         destId: item.destId,
         status: statusDispMapper(item.status),
-        createdAt: item.timestamp
+        createdAt: convertToReadableDateTime(item.timestamp, "Asia/Riyadh")
     }
 }
 
