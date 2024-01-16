@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-async function getItemsByDestId(destId) {
+async function getItemsByDestId(destId, limit, lastEvaluatedKey = null) {
     console.log(`Get Data From DynamoDB called for dest_id: ${destId}`);
 
     const keyConditionExpression = 'destIdGSK1 = :gsk';
@@ -16,19 +16,36 @@ async function getItemsByDestId(destId) {
         '#st': 'status'
     };
 
-    const params = {
+    let params = {
         TableName: process.env.tableName,
         IndexName: 'locationIndex',
         KeyConditionExpression: keyConditionExpression,
         FilterExpression: filterExpression,
         ExpressionAttributeValues: expressionAttributeValues,
-        ExpressionAttributeNames: expressionAttributeNames
+        ExpressionAttributeNames: expressionAttributeNames,
+        Limit: limit
     };
-
+    if (lastEvaluatedKey && lastEvaluatedKey != "null") {
+        const decodedKey = JSON.parse(atob(lastEvaluatedKey));
+        params.ExclusiveStartKey = decodedKey;
+    }
+    console.log("DB QUERY PARAMS", params);
     try {
         const result = await dynamoDb.query(params).promise();
         console.log(`Items retrieved for dest_id ${destId} from DynamoDB:`, result.Items);
-        return result.Items;
+        if(result.Items && result.Count > 0){
+            return {
+                items: result.Items,
+                latestEvaluatedKey: result.LastEvaluatedKey ? btoa(JSON.stringify(result.LastEvaluatedKey)) : null
+            }
+        }else{
+            return {
+                items: [],
+                latestEvaluatedKey: null
+            }
+        }
+
+
     } catch (error) {
         console.error(`Error getting items for dest_id ${destId} from DynamoDB:`, error);
         throw error;
@@ -37,6 +54,8 @@ async function getItemsByDestId(destId) {
 
 exports.handler = async (event) => {
     try {
+        console.log("Incoming Event", event);
+        const { lastEvaluatedKey, limit = 100 } = event.queryStringParameters;
         const destId = event.queryStringParameters?.destId ?? null; 
         if (!destId) {
             const res = {
@@ -51,10 +70,10 @@ exports.handler = async (event) => {
         }
 
         
-        const headerItems = await getItemsByDestId(destId);
+        const { items = [], latestEvaluatedKey = null } = await getItemsByDestId(destId, limit, lastEvaluatedKey);
 
         
-        const transfers = headerItems.map(item => ({
+        const transfers = items.map(item => ({
             transferSeqId: item.PK.split('#')[1], 
             fromStoreId: item['fromStoreId'],
             destStoreId: item['destStoreId'],
@@ -68,6 +87,7 @@ exports.handler = async (event) => {
 
         const response = {
             destLocId: destId,
+            lastEvaluatedKey: latestEvaluatedKey,
             transfers: transfers
         };
 
