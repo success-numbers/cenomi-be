@@ -9,6 +9,10 @@ exports.handler = async (event) => {
         if(!fileName){
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: "Invalid fileName" }),
             };  
         }
@@ -28,11 +32,19 @@ exports.handler = async (event) => {
             const item = result.Items[0];
             return {
                 statusCode: 200,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify(utility.dbTransformMapper(item)),
             };
         }else{
             return {
                 statusCode: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: `Given File Transfer Name Not Found` }),
             }
         }
@@ -40,6 +52,10 @@ exports.handler = async (event) => {
         console.error("Error fetching transfers:", error);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: `Error! ${error.toString()}` }),
         };
     }

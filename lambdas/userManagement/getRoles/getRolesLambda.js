@@ -9,6 +9,10 @@ exports.handler = async (event) => {
     if (!pattern.test(roleIds)) {
       return {
         statusCode: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+      },
         body: JSON.stringify({ message: `Invalid roles: ${roleIds}` }),
       };
     }
@@ -72,12 +76,20 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ paginationToken: currentPaginationToken, roles: finalRoles }),
     };
   } catch (e) {
     console.error('Error:', e.message);
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: e.message }),
     };
 

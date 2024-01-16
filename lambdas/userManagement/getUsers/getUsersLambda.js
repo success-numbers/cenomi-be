@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-
+const constants = require('./constants');
 exports.handler = async (event) => {
   try {
 
@@ -55,12 +55,22 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ paginationToken: currentPaginationToken, users: finalusers }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
+      body: JSON.stringify({ paginationToken: currentPaginationToken, users: finalusers, 
+        display_name: constants.ColumnMappings,
+      }),
     };
   } catch (e) {
     console.error('Error:', e.message);
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: e.message }),
     };
 

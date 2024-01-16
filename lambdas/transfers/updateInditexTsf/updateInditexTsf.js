@@ -9,6 +9,10 @@ exports.handler = async (event) => {
         if (!transferSeqId || !row) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: 'transferSeqId and row are required.' }),
             };
         }
@@ -39,12 +43,20 @@ exports.handler = async (event) => {
 
         return {
             statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: 'Pick Qty Updated.'}),
         };
     } catch (error) {
         console.error('Error:', error.message);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: `Internal server error: ${error.message}` }),
         };
     }

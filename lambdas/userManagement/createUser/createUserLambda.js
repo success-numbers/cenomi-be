@@ -7,6 +7,10 @@ exports.handler = async (event) => {
   if (!userId || !email || !password || !roleId) {
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: 'userId, email, password, roleId is required' }),
     };
   }
@@ -15,6 +19,10 @@ exports.handler = async (event) => {
   if (!pattern.test(userId)) {
       return {
           statusCode: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
           body: JSON.stringify({ message: `Invalid userId: ${userId}. Only Alphanumeric values allowed.` }),
       };
   }
@@ -83,12 +91,20 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: `User ${userId} created` }),
     };
   } catch (e) {
     console.error('Error:', e.message);
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: e.message }),
     };
 

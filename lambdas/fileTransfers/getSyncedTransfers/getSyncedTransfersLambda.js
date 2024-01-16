@@ -23,6 +23,10 @@ exports.handler = async (event) => {
         if (!fileName || !fileType) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: 'Filename and fileType are required.' }),
             };
         }
@@ -72,6 +76,10 @@ exports.handler = async (event) => {
         mappedData = [...mappedData, ...mappedDSDItems];
         return {
             statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: 'Data fetched successfully.', fileName:fileName, fileType: fileType, Items: mappedData, 
             "display_name": constants.ColumnMappings,
             "display_csv_col": constants.CSVColumMappings(fileType) 
@@ -81,6 +89,10 @@ exports.handler = async (event) => {
         console.error('Error:', error.message);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: `Internal server error: ${error.message}` }),
         };
     }

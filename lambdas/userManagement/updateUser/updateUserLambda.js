@@ -7,6 +7,10 @@ exports.handler = async (event) => {
   if (!userId) {
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: 'userId is required' }),
     };
   }
@@ -81,6 +85,10 @@ exports.handler = async (event) => {
     if (updateParams.UpdateExpression === undefined) {
       return {
         statusCode: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+      },
         body: JSON.stringify({ message: `No Role/Status change detected from request` })
       };
     }
@@ -91,11 +99,19 @@ exports.handler = async (event) => {
       await dynamoDb.update(updateParams).promise();
       return {
         statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+      },
         body: JSON.stringify({ message: `User ${userId} updated` }),
       };
     } catch (e) {
       return {
         statusCode: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+      },
         body: JSON.stringify({ message: `User is not valid.` }),
       };
     }
@@ -103,6 +119,10 @@ exports.handler = async (event) => {
     console.error('Error fetching destLocIds:', e.message);
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: e.message }),
     };
 

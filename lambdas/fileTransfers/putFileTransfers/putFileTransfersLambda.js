@@ -19,11 +19,19 @@ exports.handler = async (event) => {
                     if (processingResponse.success) {
                         return {
                             statusCode: 200,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ message: 'Payload inserted successfully' }),
                         };
                     } else {
                         return {
                             statusCode: 500,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ message: processingResponse.errorMessage }),
                         };
                     }
@@ -36,11 +44,19 @@ exports.handler = async (event) => {
                     if (processingResponse.success) {
                         return {
                             statusCode: 200,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ message: 'Payload inserted successfully' }),
                         };
                     } else {
                         return {
                             statusCode: 500,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ message: processingResponse.errorMessage }),
                         };
                     }
@@ -53,11 +69,19 @@ exports.handler = async (event) => {
                     if (processingResponse.success) {
                         return {
                             statusCode: 200,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ message: 'Payload inserted successfully' }),
                         };
                     } else {
                         return {
                             statusCode: 500,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ message: processingResponse.errorMessage }),
                         };
                     }
@@ -70,11 +94,19 @@ exports.handler = async (event) => {
                     if (processingResponse.success) {
                         return {
                             statusCode: 200,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ message: 'Payload inserted successfully' }),
                         };
                     } else {
                         return {
                             statusCode: 500,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ message: processingResponse.errorMessage }),
                         };
                     }
@@ -83,6 +115,10 @@ exports.handler = async (event) => {
             default:
                 return {
                     statusCode: 400,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
                     body: JSON.stringify({ message: 'Invalid fileType' }),
                 };
         }

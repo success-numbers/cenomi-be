@@ -105,6 +105,10 @@ exports.handler = async (event) => {
                         }catch(e){
                             return {
                                 statusCode: 500,
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Access-Control-Allow-Origin': '*'
+                                },
                                 body: JSON.stringify({ 
                                     message: `Error! ${e}` 
                                 }),
@@ -116,6 +120,10 @@ exports.handler = async (event) => {
                         await updateHeaderInditexDataTable(transferSeqId);
                         return {
                             statusCode: 200,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ 
                                 code: "E00001",
                                 message: 'Successfully Submitted Transfer.' 
@@ -126,6 +134,10 @@ exports.handler = async (event) => {
 
                     return {
                         statusCode: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({ 
                             code: "E02001",
                             data : existingPendingUsers.map((e) =>{
@@ -149,6 +161,10 @@ exports.handler = async (event) => {
                             await deleteUserLock(fileTransferLockTable, transferSeqId, key);
                             return {
                                 statusCode: 200,
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Access-Control-Allow-Origin': '*'
+                                },
                                 body: JSON.stringify({ 
                                     message: 'Successfully Submitted Transfer.' 
                                 }),
@@ -156,6 +172,10 @@ exports.handler = async (event) => {
                         }catch(e){
                             return {
                                 statusCode: 500,
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Access-Control-Allow-Origin': '*'
+                                },
                                 body: JSON.stringify({ 
                                     message: `Error! ${e}` 
                                 }),
@@ -164,6 +184,10 @@ exports.handler = async (event) => {
                     }
                     return {
                         statusCode: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({ 
                             code: "E00003",
                             message: 'Shortage Items Present',
@@ -181,6 +205,10 @@ exports.handler = async (event) => {
                         await updateHeaderInditexDataTable(transferSeqId);
                         return {
                             statusCode: 200,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ 
                                 code: "E00001",
                                 message: 'Successfully Submitted Transfer.' 
@@ -191,6 +219,10 @@ exports.handler = async (event) => {
 
                     return {
                         statusCode: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({ 
                             code: "E02001",
                             data : existingPendingUsers.map((e) =>{
@@ -208,6 +240,10 @@ exports.handler = async (event) => {
             } else {
                 return {
                     statusCode: 400,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
                     body: JSON.stringify({ message: 'No Lock entries found for the given fileName.' }),
                 };
             }

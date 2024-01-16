@@ -14,6 +14,10 @@ exports.handler = async (event) => {
         if (!validFileTypes.includes(type)) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: "Invalid fileType" }),
             };
         }
@@ -24,6 +28,10 @@ exports.handler = async (event) => {
             if (!validStatusValues.includes(s)) {
                 return {
                     statusCode: 400,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
                     body: JSON.stringify({ message: `Invalid status: ${s}` }),
                 };
             }
@@ -48,6 +56,10 @@ exports.handler = async (event) => {
                 }
                 return {
                     statusCode: 200,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
                     body: JSON.stringify({
                         fileType: type,
                         paginationToken: lastUpdatedKey,
@@ -75,6 +87,10 @@ exports.handler = async (event) => {
                     }
                     return {
                         statusCode: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({
                             fileType: type,
                             paginationToken: lastUpdatedKey,
@@ -99,6 +115,10 @@ exports.handler = async (event) => {
                         }
                         return {
                             statusCode: 200,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({
                                 fileType: type,
                                 paginationToken: lastUpdatedKey,
@@ -114,6 +134,10 @@ exports.handler = async (event) => {
         console.error("Error fetching transfers:", error);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: `Error! ${error.toString()}` }),
         };
     }

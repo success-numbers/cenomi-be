@@ -56,12 +56,20 @@ exports.handler = async (event, context) => {
         // Return necessary details like statement ID, manifest, and total chunks
         return {
             statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ statementId, manifest, totalChunks })
         };
     } catch (error) {
         console.error(error);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ error: 'Internal Server Error' })
         };
     }

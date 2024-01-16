@@ -17,6 +17,10 @@ exports.handler = async (event) => {
         if (!userId || !fileName || !fileType || !timestamp || !key) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: 'key, userId, fileName, fileType, and timestamp are required.' }),
             };
         }
@@ -52,6 +56,10 @@ exports.handler = async (event) => {
                     }catch(e){
                         return {
                             statusCode: 500,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ 
                                 message: `Error! ${e}` 
                             }),
@@ -63,6 +71,10 @@ exports.handler = async (event) => {
                     await updateHeaderStatus(fileName, process.env.dataTable);
                     return {
                         statusCode: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({ 
                             code: "E00001",
                             message: 'Successfully Submitted Transfer.' 
@@ -74,6 +86,10 @@ exports.handler = async (event) => {
                 const existingPendingUsers = existingLocksForTsf.Items.filter((user) => user.SK != key);
                 return {
                     statusCode: 200,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
                     body: JSON.stringify({ 
                         data : existingPendingUsers.map((e) =>{
                             return {
@@ -93,6 +109,10 @@ exports.handler = async (event) => {
                     await deleteUserLock(fileTransferLockTable, fileName, key);
                     return {
                         statusCode: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({ 
                             message: 'Successfully Submitted Transfer.' 
                         }),
@@ -100,6 +120,10 @@ exports.handler = async (event) => {
                 }catch(e){
                     return {
                         statusCode: 500,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({ 
                             message: `Error! ${e}` 
                         }),
@@ -110,6 +134,10 @@ exports.handler = async (event) => {
                     await updateHeaderStatus(fileName, process.env.dataTable);
                     return {
                         statusCode: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({ 
                             code: "E00001",
                             message: 'Successfully Submitted Transfer.' 
@@ -120,6 +148,10 @@ exports.handler = async (event) => {
                 const existingPendingUsers = existingLocksForTsf.Items.filter((user) => user.SK != key);
                 return {
                     statusCode: 200,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
                     body: JSON.stringify({ 
                         code: "E02001",
                         data : existingPendingUsers.map((e) =>{
@@ -137,6 +169,10 @@ exports.handler = async (event) => {
         } else {
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: 'No Lock entries found for the given fileName.' }),
             };
         }
@@ -144,6 +180,10 @@ exports.handler = async (event) => {
         console.error('Error:', error);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: `Error! ${error.toString()}` }),
         };
     }

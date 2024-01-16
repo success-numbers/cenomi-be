@@ -20,6 +20,10 @@ exports.handler = async (event) => {
                 } else {
                     return {
                         statusCode: 400,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({ message: `Validation failed for ALLOC: ${validationResponse.errorMessage}` }),
                     };
                 }
@@ -37,6 +41,10 @@ exports.handler = async (event) => {
                     } else {
                         return {
                             statusCode: 400,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                             body: JSON.stringify({ message: `Validation failed for GRN: ${validationResponse.errorMessage}` }),
                         };
                     }
@@ -50,6 +58,10 @@ exports.handler = async (event) => {
                 } else {
                     return {
                         statusCode: 400,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
                         body: JSON.stringify({ message: `Validation failed for DSD: ${validationResponse.errorMessage}` }),
                     };
                 }
@@ -57,6 +69,10 @@ exports.handler = async (event) => {
             default:
                 return {
                     statusCode: 400,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
                     body: JSON.stringify({ message: 'Invalid fileType' }),
                 };
         }
@@ -82,11 +98,19 @@ function generateResponse(processingResponse) {
     if (processingResponse.success) {
         return {
             statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: 'Payload inserted successfully' }),
         };
     } else {
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: processingResponse.errorMessage }),
         };
     }

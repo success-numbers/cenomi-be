@@ -1,16 +1,29 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
+const statusDispMapper = (status) => {
+    const map = {
+            "OPEN": "Open",
+            "INPROGRESS": "In Progress",
+            "SUBMITTED": "Submitted"
+    }
+    if(map[status] != undefined){
+            return map[status];
+    }
+    return status;
+}
+
 const dbItemMapper = (item) => {
 
     return {
         seqNo: item.PK.split("#")[1],
         docNo: item.docNo,
         destId: item.destId,
-        status: item.status,
+        status: statusDispMapper(item.status),
         createdAt: item.timestamp
     }
 }
+
 
 exports.handler = async (event) => {
     try {
@@ -20,6 +33,10 @@ exports.handler = async (event) => {
         if (!pattern.test(status)) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: `Invalid status: ${status}` }),
             };
         }
@@ -53,6 +70,10 @@ exports.handler = async (event) => {
 
         return {
             statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify(
                 {
                     paginationToken: result.LastEvaluatedKey ? btoa(JSON.stringify(result.LastEvaluatedKey)) : undefined,
@@ -61,7 +82,7 @@ exports.handler = async (event) => {
                         docNo: "Document No",
                         destId: "StoreId",
                         status: "Status",
-                        createdAt: "Created At",
+                        createdAt: "Create Date",
                         seqNo: "Sequence No"
                     }
                 }),
@@ -71,6 +92,10 @@ exports.handler = async (event) => {
         console.error('Error:', error.message);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: `Internal server error: ${error.message}` }),
         };
     }

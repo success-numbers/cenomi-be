@@ -8,6 +8,10 @@ exports.handler = async (event) => {
         if (!key || !entityId || !userId || !fileType || !timestamp || !deviceId) {
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: 'key, entityId, userId, fileType, timestamp, deviceId are required.' }),
             };
         }
@@ -47,6 +51,10 @@ exports.handler = async (event) => {
             console.log(ex);
             return {
                 statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: `Invalid data provided` }),
             };
         }
@@ -67,6 +75,10 @@ exports.handler = async (event) => {
         if (result && result.Count > 0) {
             return {
                 statusCode: 200,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
                 body: JSON.stringify({ message: `Data already exists in lockTable created at ${result.Items[0].timestamp}.` }),
             };
         }
@@ -88,12 +100,20 @@ exports.handler = async (event) => {
 
         return {
             statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: 'Data inserted into lockTable successfully.' }),
         };
     } catch (error) {
         console.error('Error:', error.message);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: `Internal server error: ${error.message}` }),
         };
     }

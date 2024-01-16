@@ -109,13 +109,8 @@
         "role_1": "role/cloud9-oms-verifyorderRole-1GVXMF164068H"
       },
       "allowCrossOrigins": [
-        "https://d35vw099ooesiq.amplifyapp.com",
-        "https://enhancecl.d35vw099ooesiq.amplifyapp.com",
-        "https://enhance.d35vw099ooesiq.amplifyapp.com",
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://sit.d35vw099ooesiq.amplifyapp.com",
-        "https://uat.dlpnhy99scsgh.amplifyapp.com"
+        "https://sit.dtayipqfoagnk.amplifyapp.com",
+        "http://localhost:3000"
       ]
     }
   }

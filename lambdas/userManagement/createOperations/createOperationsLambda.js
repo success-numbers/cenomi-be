@@ -7,6 +7,10 @@ exports.handler = async (event) => {
   if (!seqNo || !operationId || !operationDesc) {
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: 'seqNo, operationId, operationDesc is required' }),
     };
   }
@@ -15,6 +19,10 @@ exports.handler = async (event) => {
   if (!pattern.test(seqNo)) {
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: `Invalid SeqNo: ${seqNo}. Only Numeric Values Allowed` }),
     };
   }
@@ -41,12 +49,20 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: `Operation ${operationId} created` }),
     };
   } catch (e) {
     console.error('Error:', e.message);
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: e.message }),
     };
 

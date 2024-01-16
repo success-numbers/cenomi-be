@@ -7,6 +7,10 @@ exports.handler = async (event) => {
   if (!roleId || !role || !updatedBy || isActive === undefined) {
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: 'roleId, role, updatedBy,isActive is required' }),
     };
   }
@@ -82,12 +86,20 @@ exports.handler = async (event) => {
 
       return {
         statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+      },
         body: JSON.stringify({ finalRole }),
       };
     } catch (e) {
       console.log(e);
       return {
         statusCode: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+      },
         body: JSON.stringify({ message: `The Role is not valid.` }),
       };
     }
@@ -95,6 +107,10 @@ exports.handler = async (event) => {
     console.error('Error:', e.message);
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    },
       body: JSON.stringify({ message: e.message }),
     };
 
