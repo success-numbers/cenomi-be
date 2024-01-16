@@ -41,11 +41,14 @@ const statusDispMapper = (status) => {
 }
 
 const dbItemMapper = (item) => {
-
+    let storeId = `${item.destId}`;
+    if(item.fromStoreDesc != undefined && item.fromStoreDesc != null && item.fromStoreDesc != "null"){
+        storeId+=`-${item.fromStoreDesc}`
+    }
     return {
         seqNo: item.PK.split("#")[1],
         docNo: item.docNo,
-        destId: item.destId,
+        destId: `${storeId}`,
         status: statusDispMapper(item.status),
         createdAt: convertToReadableDateTime(item.timestamp, "Asia/Riyadh")
     }
@@ -106,11 +109,11 @@ exports.handler = async (event) => {
                     paginationToken: result.LastEvaluatedKey ? btoa(JSON.stringify(result.LastEvaluatedKey)) : undefined,
                     transfers: result.Items.map((e) => dbItemMapper(e)),
                     display_name: {
+                        seqNo: "Sequence No",
                         docNo: "Document No",
                         destId: "StoreId",
                         status: "Status",
                         createdAt: "Create Date",
-                        seqNo: "Sequence No"
                     }
                 }),
         };
