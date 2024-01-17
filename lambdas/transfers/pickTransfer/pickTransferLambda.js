@@ -8,7 +8,7 @@ exports.handler = async (event) => {
 
         const { user_id, dest_id, transferSeqId, pickedItems } = requestBody;
 
-        if (!user_id || !dest_id || !transferSeqId || !pickedItems) {
+        if (!dest_id || !transferSeqId || !pickedItems) {
             return {
                 statusCode: 400,
                 headers: {
