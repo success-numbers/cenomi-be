@@ -7,3 +7,15 @@ exports.ColumnMappings  = {
         "createdAt": "Created At",
         "updatedAt": "Updated At"
 }
+
+exports.statusDispMapper = (status) => {
+        const map = {
+                "OPEN": "Open",
+                "INPROGRESS": "In Progress",
+                "SUBMITTED": "Submitted"
+        }
+        if(map[status] != undefined){
+                return map[status];
+        }
+        return status;
+}

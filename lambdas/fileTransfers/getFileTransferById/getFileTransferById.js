@@ -4,7 +4,7 @@ const utility = require('./utility');
 
 exports.handler = async (event) => {
     try {
-        const { fileName = null } = event.queryStringParameters;
+        const { fileName = null, fileType = null, validateFileType = false } = event.queryStringParameters;
 
         if(!fileName){
             return {
@@ -30,6 +30,29 @@ exports.handler = async (event) => {
 
         if (result.Count && result.Count > 0) {
             const item = result.Items[0];
+            if(validateFileType){
+                if(item?.fileType ?? "" != fileType){
+                    return {
+                        statusCode: 500,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
+                        body: JSON.stringify({ message: `Wrong file Type searched for tsf name` }),
+                    }
+                }
+            }
+            if(item.status.toUpperCase() == 'SUBMITTED'){
+                return {
+                    statusCode: 500,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    body: JSON.stringify({ message: `File Tsf is already submitted` }),
+                }
+            }
+
             return {
                 statusCode: 200,
                 headers: {
