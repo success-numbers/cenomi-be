@@ -73,6 +73,13 @@
           "masterGatewayName": "Cenomi-BE",
           "exportApiId": "Master-Api-Id",
           "exportResourceId": "Master-Resource-Id"
+        },
+        "databricks": {
+          "azureStorage": {
+            "connectionString": "BlobEndpoint=https://cenomistorage.blob.core.windows.net/;QueueEndpoint=https://cenomistorage.queue.core.windows.net/;AccountName=cenomistorage;FileEndpoint=https://cenomistorage.file.core.windows.net/;TableEndpoint=https://cenomistorage.table.core.windows.net/;SharedAccessSignature=sv=2022-11-02&ss=bf&srt=co&sp=rwlac&se=2025-12-30T20:17:40Z&st=2023-11-28T12:17:40Z&spr=https&sig=sinMOnYK%2BlA%2FuhsGYcIoKluDQEo3eFEFTPDQNsAwSow%3D",
+            "container": "dev",
+            "blobPath": "prelanding/finance/inditex/Warehouse_Mov_Confirmation"
+          }
         }
       },
       "dynamoDBTables": {
@@ -90,7 +97,7 @@
       "layers": {
         "npmLayer": {
           "name": "NPMPackagesLayer",
-          "version": "1"
+          "version": "4"
         },
         "modelsLayer": {}
       },

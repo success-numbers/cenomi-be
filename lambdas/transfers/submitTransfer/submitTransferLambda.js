@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-
+const sqs = new AWS.SQS({ region: process.env.REGION });
 
 const deleteUserLock = async (lockTable, tsfSeqNo, key) => {
     const deleteParam = {
@@ -15,16 +15,6 @@ const deleteUserLock = async (lockTable, tsfSeqNo, key) => {
 }
 
 const getShortageItems = async (tsfSeqNo) => {
-    // const qParams = {
-    //     TableName: process.env.tableName,
-    //     IndexName: 'statusTsfSeqNoIndex',
-    //     KeyConditionExpression: "#st = :status AND PK = :tsfSeq",
-    //     ExpressionAttributeValues: {
-    //         ':status': `false`,
-    //         ':tsfSeq': tsfSeqNo
-    //     },
-    //     ExpressionAttributeNames: {'#st': 'status'}
-    // };
     const params = {
         TableName: process.env.tableName,
         KeyConditionExpression: 'PK = :pkVal',
@@ -64,6 +54,16 @@ const updateHeaderInditexDataTable = async (transferSeqId) => {
         throw e;
     }
 
+}
+
+const sendSubmitDataToDatabricks = async (tsfSeqNo) => {
+    const params = {
+        MessageBody: JSON.stringify({
+            "tsfSeqNo": tsfSeqNo
+        }),
+        QueueUrl: process.env.SYNC_SQS,
+    };
+    await sqs.sendMessage(params).promise();
 }
 
 exports.handler = async (event) => {
@@ -118,6 +118,7 @@ exports.handler = async (event) => {
                     }
                     if(force){
                         await updateHeaderInditexDataTable(transferSeqId);
+                        // await sendSubmitDataToDatabricks(transferSeqId);
                         return {
                             statusCode: 200,
                             headers: {
@@ -157,6 +158,7 @@ exports.handler = async (event) => {
                     if(shortageItemsList.length == 0 || (shortageItemsList.length > 0 && force)){
                         // No Shoratge Items Present. Submit Successfully
                         await updateHeaderInditexDataTable(transferSeqId);
+                        // await sendSubmitDataToDatabricks(transferSeqId);
                         try{
                             await deleteUserLock(fileTransferLockTable, transferSeqId, key);
                             return {
@@ -203,6 +205,7 @@ exports.handler = async (event) => {
                 } else {
                     if(force){
                         await updateHeaderInditexDataTable(transferSeqId);
+                        // await sendSubmitDataToDatabricks(transferSeqId);
                         return {
                             statusCode: 200,
                             headers: {
