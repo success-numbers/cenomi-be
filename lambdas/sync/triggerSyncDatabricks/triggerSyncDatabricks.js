@@ -56,12 +56,20 @@ exports.handler = async (event, context) => {
         console.log("Successfully Triggered Syncing Data from Databricks");
         return {
             statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: "Syncing Started Successfully" })
         };
     } catch (error) {
         console.error(error);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: JSON.stringify(error) })
         };
     }

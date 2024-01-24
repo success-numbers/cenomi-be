@@ -8,7 +8,7 @@ exports.handler = async (event) => {
 
         const { user_id, dest_id, transferSeqId, pickedItems } = requestBody;
 
-        if (!user_id || !dest_id || !transferSeqId || !pickedItems) {
+        if (!dest_id || !transferSeqId || !pickedItems) {
             return {
                 statusCode: 400,
                 headers: {
@@ -27,9 +27,10 @@ exports.handler = async (event) => {
                 'PK': `DET#${transferSeqId}`,
                 'SK': item.barcode
               },
-              UpdateExpression: 'SET pickedQuantity = pickedQuantity + :val',
+              UpdateExpression: 'SET pickedQuantity = pickedQuantity + :val, isScanned = :scanned',
               ExpressionAttributeValues: {
                 ':val': item.scannedQuantity,
+                ':scanned': "true"
               },
               ConditionExpression: 'attribute_exists(PK)',
             };
@@ -39,6 +40,7 @@ exports.handler = async (event) => {
             try {
               return await dynamoDb.update(params).promise();
             } catch (error) {
+
               if (error.code === 'ConditionalCheckFailedException') {
                 // Item doesn't exist, so let's add it
                 const addParams = {
@@ -50,6 +52,7 @@ exports.handler = async (event) => {
                     'quantity': item.quantity,
                     'timestamp': item.timestamp,
                     'barcode': item.barcode,
+                    'isScanned': "true",
                     'entityType': 'DETAILS'
                   }
                 };

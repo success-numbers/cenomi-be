@@ -1,6 +1,43 @@
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const convertToReadableDateTime = (timestamp, targetTimeZone = "Asia/Riyadh") => {
+    // Check if timestamp is null
+    if (timestamp === null || timestamp === undefined) {
+        return null;
+    }
 
+    // Create a Date object from the timestamp
+    const dateTime = new Date(timestamp);
+
+    // Convert to the target timezone
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: true,
+        timeZone: targetTimeZone,
+    };
+
+    const readableDateTime = dateTime.toLocaleString('en-US', options);
+
+    return readableDateTime;
+};
+
+
+const statusDispMapper = (status) => {
+    const map = {
+            "OPEN": "Open",
+            "INPROGRESS": "In Progress",
+            "SUBMITTED": "Submitted"
+    }
+    if(map[status] != undefined){
+            return map[status];
+    }
+    return status;
+}
 async function getTransferDetails(transferId) {
     console.log(`Get Transfer Details called for transferId: ${transferId}`);
 
@@ -55,17 +92,29 @@ exports.handler = async (event) => {
             };
             return res;
         }
-
+        if(statusDispMapper(transferDetails.status).toUpperCase() == "SUBMITTED"){
+            throw "Tsf is already in submitted state"; 
+        }
         const response = {
-            transferSeqId: transferId,
-            destLocId: destLocId,
-            status: transferDetails.status,
-            fromStore: transferDetails['fromStore'] ?? null,
-            fromStoreName: transferDetails['fromStoreName'] ?? null,
+            seqNo: transferId,
+            destId: destLocId,
+            status: statusDispMapper(transferDetails.status),
+            fromStoreId: transferDetails['fromStoreId'] ?? null,
+            fromStoreDesc: transferDetails['fromStoreDesc'] ?? null,
+            destStoreId: transferDetails['destStoreId'] ?? null,
             docNo: transferDetails['docNo'],
-            docDate: transferDetails.timestamp,
+            createdAt: convertToReadableDateTime(transferDetails.timestamp),
+            display_name: {
+                docNo: "Document No",
+                destId: "StoreId",
+                status: "Status",
+                fromStoreId: "From Store ID",
+                destStoreId: "Dest Store ID",
+                createdAt: "Created At",
+                seqNo: "Sequence No"
+            }
         };
-
+        
         const res = {
             statusCode: 200,
             headers: {

@@ -20,12 +20,20 @@ exports.handler = async (event, context) => {
         
         return {
             statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ message: 'Event message sent to SQS successfully' }),
         };
     } catch (error) {
         console.error('Error sending message to SQS:', error);
         return {
             statusCode: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify({ error: 'Error sending message to SQS' }),
         };
     }

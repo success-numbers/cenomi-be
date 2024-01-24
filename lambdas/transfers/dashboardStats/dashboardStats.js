@@ -100,6 +100,7 @@ exports.handler = async (event) => {
         return res;
     } catch (e) {
         console.error('Error fetching destLocIds:', e.message);
+        
         const res = {
             statusCode: 500,
             headers: {
