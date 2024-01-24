@@ -15,7 +15,7 @@ exports.getAllTsfItemData = async (tsfSeqNo) => {
     if(result.Count > 0) {
         return result.Items.map((item) => {
             return {
-                "seq_no": item.PK,
+                "seq_no": item.PK.split("#")[1],
                 "barcode": item.SK,
                 "scanned_time": item.timestamp,
                 "quantity": item.quantity,
