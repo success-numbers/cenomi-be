@@ -11,7 +11,6 @@ exports.getAllTsfItemData = async (tsfSeqNo) => {
     };
 
     const result = await dynamoDb.query(params).promise();
-    
     if(result.Count > 0) {
         return result.Items.map((item) => {
             return {

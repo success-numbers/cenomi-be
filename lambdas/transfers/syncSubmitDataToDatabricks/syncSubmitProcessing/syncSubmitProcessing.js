@@ -8,6 +8,7 @@ const handler = async (event) => {
 	console.log("Create Sync Submit Processing Lambda Incoming Event", JSON.stringify(event));
     const connectionString = process.env.BLOB_CONNECTION_STRING;
     const containerName = process.env.BLOB_CONTAINER;
+	console.log("MEOW 1",connectionString, containerName,process.env.BLOB_PATH);
 	try {
 	  await Promise.all(event.Records.map(async (record) => {
 		const recordBody = JSON.parse(record.body || '{}');
