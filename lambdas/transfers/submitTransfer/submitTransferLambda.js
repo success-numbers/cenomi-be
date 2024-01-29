@@ -118,7 +118,7 @@ exports.handler = async (event) => {
                     }
                     if(force){
                         await updateHeaderInditexDataTable(transferSeqId);
-                        // await sendSubmitDataToDatabricks(transferSeqId);
+                        await sendSubmitDataToDatabricks(transferSeqId);
                         return {
                             statusCode: 200,
                             headers: {
@@ -158,7 +158,7 @@ exports.handler = async (event) => {
                     if(shortageItemsList.length == 0 || (shortageItemsList.length > 0 && force)){
                         // No Shoratge Items Present. Submit Successfully
                         await updateHeaderInditexDataTable(transferSeqId);
-                        // await sendSubmitDataToDatabricks(transferSeqId);
+                        await sendSubmitDataToDatabricks(transferSeqId);
                         try{
                             await deleteUserLock(fileTransferLockTable, transferSeqId, key);
                             return {
@@ -205,7 +205,7 @@ exports.handler = async (event) => {
                 } else {
                     if(force){
                         await updateHeaderInditexDataTable(transferSeqId);
-                        // await sendSubmitDataToDatabricks(transferSeqId);
+                        await sendSubmitDataToDatabricks(transferSeqId);
                         return {
                             statusCode: 200,
                             headers: {
