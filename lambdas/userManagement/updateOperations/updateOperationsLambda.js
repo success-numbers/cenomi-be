@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
-  const { seqNo, operationId, operationDesc, isActive, updatedBy } = JSON.parse(event.body);
+  const { seqNo, operationId, operationDesc, isActive, updatedBy } = JSON.parse(event.body ?? "{}");
 
   if (!seqNo || !operationId || !operationDesc || isActive === undefined) {
     return {

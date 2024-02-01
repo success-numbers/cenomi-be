@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
-  const { roleId, role, createdBy } = JSON.parse(event.body);
+  const { roleId, role, createdBy } = JSON.parse(event.body ?? "{}");
 
   if (!roleId || !role || !createdBy) {
     return {
@@ -14,7 +14,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({ message: 'roleId, role, createdBy is required' }),
     };
   }
-  
+
   const pattern = /^[a-zA-Z0-9]*$/;
   if (!pattern.test(roleId)) {
       return {

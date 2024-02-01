@@ -7,6 +7,7 @@ exports.handler = async (event) => {
     const { userIds, paginationToken, limit } = event.queryStringParameters ?? {};
 
     const userTable = process.env.userTable;
+    const roleTable = process.env.roleTable;
 
     const userQueryParams = {
       TableName: userTable,
@@ -36,6 +37,7 @@ exports.handler = async (event) => {
     const users = result.Items;
     const currentPaginationToken = result.LastEvaluatedKey ? btoa(JSON.stringify(result.LastEvaluatedKey)) : undefined;
 
+
     const finalusers = [];
     users.forEach(user => {
       if (user.active) {
@@ -53,6 +55,32 @@ exports.handler = async (event) => {
       }
     });
 
+    if (userIds) {
+      const roleQueryParams = {
+        TableName: roleTable,
+        IndexName: 'EntityTypeIndex',
+        KeyConditionExpression: "entityType = :rolesEntity",
+        ExpressionAttributeValues: {
+          ":rolesEntity": "ROLE"
+        },
+      };
+      let qFilter = "";
+      for (let i = 0; i < users.length; i++) {
+        qFilter = i === 0 ? `PK= :role${i}` : `${qFilter} or PK= :role${i}`;
+        roleQueryParams.ExpressionAttributeValues[`:role${i}`] = users[i].roleId;
+      }
+      roleQueryParams.FilterExpression = qFilter;
+      console.log('Getting roles', roleQueryParams);
+      const resultRoles = (await dynamoDb.query(roleQueryParams).promise()).Items;
+      console.log('Got roles', result);
+      finalusers.forEach(user => {
+        if (resultRoles.find((role) => role.PK === user.roleId) === undefined) {
+          user.roleStatus = 'INVALID'
+        } else {
+          user.roleStatus = 'VALID'
+        }
+      });
+    }
     return {
       statusCode: 200,
       headers: {

@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
-  const { roleId, role, updatedBy, isActive } = JSON.parse(event.body);
+  const { roleId, role, updatedBy, isActive } = JSON.parse(event.body ?? "{}");
 
   if (!roleId || !role || !updatedBy || isActive === undefined) {
     return {
