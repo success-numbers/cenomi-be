@@ -101,19 +101,60 @@
         },
         "modelsLayer": {}
       },
-      "vpc": {
-        "retail": "vpc-03b9c564"
-      },
-      "securityGroups": {
-        "SG": "sg-0666b19beab549604"
-      },
-      "subnets": [
-        {
-          "subnet_id": "subnet-eda0faa4"
-        }
-      ],
       "roles": {
-        "role_1": "role/cloud9-oms-verifyorderRole-1GVXMF164068H"
+        "role_1": null
+      },
+      "allowCrossOrigins": [
+        "https://sit.dtayipqfoagnk.amplifyapp.com",
+        "http://localhost:3000"
+      ]
+    },
+    "uat-config": {
+      "project": {
+        "projectName": "Cenomi-Integration",
+        "projectEnvironment": "UAT",
+        "projectVersion": "0.0.1"
+      },
+      "env": {
+        "account": "211125620477",
+        "region": "ap-south-1"
+      },
+      "attributes": {
+        "masterApiGateway": {
+          "stageName": "uat",
+          "masterGatewayName": "Cenomi-BE",
+          "exportApiId": "Master-Api-Id",
+          "exportResourceId": "Master-Resource-Id"
+        },
+        "databricks": {
+          "azureStorage": {
+            "connectionString": "BlobEndpoint=https://cenomistorage.blob.core.windows.net/;QueueEndpoint=https://cenomistorage.queue.core.windows.net/;AccountName=cenomistorage;FileEndpoint=https://cenomistorage.file.core.windows.net/;TableEndpoint=https://cenomistorage.table.core.windows.net/;SharedAccessSignature=sv=2022-11-02&ss=bf&srt=co&sp=rwlac&se=2025-12-30T20:17:40Z&st=2023-11-28T12:17:40Z&spr=https&sig=sinMOnYK%2BlA%2FuhsGYcIoKluDQEo3eFEFTPDQNsAwSow%3D",
+            "container": "dev",
+            "blobPath": "prelanding/finance/inditex/Warehouse_Mov_Confirmation"
+          }
+        }
+      },
+      "dynamoDBTables": {
+        "InditexDataTable": "Inditex-Data",
+        "FileTransferDataTable": "FileTransfer-Data",
+        "FileTransferSyncTable": "FileTransfer-Sync",
+        "FileTransferLockTable": "FileTransfer-Lock",
+        "UsersTable": "User-Management",
+        "RoleTable": "User-Management",
+        "OperationsTable": "User-Management",
+        "ConfigTable": "Config",
+        "ChunkTable": "ChunkTable",
+        "SyncDataTable": "SyncDataTable"
+      },
+      "layers": {
+        "npmLayer": {
+          "name": "NPMPackagesLayer",
+          "version": "1"
+        },
+        "modelsLayer": {}
+      },
+      "roles": {
+        "role_1": "role/lambda-inditex-role"
       },
       "allowCrossOrigins": [
         "https://sit.dtayipqfoagnk.amplifyapp.com",

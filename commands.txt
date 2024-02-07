@@ -1,0 +1,30 @@
+
+// ENV SIT
+cdk deploy --all --profile default  -c deploy-environment=sit
+
+cdk deploy cenomi-integration-sit-buisness-stack --profile default  -c deploy-environment=sit
+cdk deploy cenomi-integration-sit-layers-stack --profile default  -c deploy-environment=sit
+cdk deploy cenomi-integration-sit-dynamodb-stack --profile default  -c deploy-environment=sit
+cdk deploy cenomi-integration-sit-cognito-stack --profile default  -c deploy-environment=sit
+cdk deploy cenomi-integration-sit-usermanagement-stack --profile default  -c deploy-environment=sit
+
+// ENV UAT
+
+cdk deploy --all --profile default  -c deploy-environment=uat
+
+cdk deploy cenomi-integration-uat-buisness-stack --profile default  -c deploy-environment=uat
+cdk deploy cenomi-integration-uat-layers-stack --profile default  -c deploy-environment=uat
+cdk deploy cenomi-integration-uat-dynamodb-stack --profile default  -c deploy-environment=uat
+cdk deploy cenomi-integration-uat-cognito-stack --profile default  -c deploy-environment=uat
+cdk deploy cenomi-integration-uat-usermanagement-stack --profile default  -c deploy-environment=uat
+
+
+// ENV PROD
+
+cdk deploy --all --profile default  -c deploy-environment=prod
+
+cdk deploy cenomi-integration-prod-buisness-stack --profile default  -c deploy-environment=prod
+cdk deploy cenomi-integration-prod-layers-stack --profile default  -c deploy-environment=prod
+cdk deploy cenomi-integration-prod-dynamodb-stack --profile default  -c deploy-environment=prod
+cdk deploy cenomi-integration-prod-cognito-stack --profile default  -c deploy-environment=prod
+cdk deploy cenomi-integration-prod-usermanagement-stack --profile default  -c deploy-environment=prod
