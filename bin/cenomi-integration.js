@@ -41,6 +41,12 @@ new CenomiIntegrationCommonStack(app,`${StackPrefix}common-stack`,{
   allowCrossOrigins: config.allowCrossOrigins,
 });
 
+new CenomiIntegrationLayersStack(app,`${StackPrefix}layers-stack`,{
+  resourcePrefix : projectResourcesPrefix,
+  layersData: config.layers,
+  env: config.env
+});
+
 new CenomiIntegrationDynamoDbStack(app, `${StackPrefix}dynamodb-stack`,{
   resourcePrefix : projectResourcesPrefix,
   env: config.env,
@@ -58,11 +64,6 @@ new CenomiIntegrationBusinessStack(app, `${StackPrefix}buisness-stack`,{
   allowCrossOrigins: config.allowCrossOrigins,
   layersData:config.layers,
   runtime: cdk.aws_lambda.Runtime.NODEJS_18_X
-});
-new CenomiIntegrationLayersStack(app,`${StackPrefix}layers-stack`,{
-  resourcePrefix : projectResourcesPrefix,
-  layersData: config.layers,
-  env: config.env
 });
 
 new CenomiIntegrationUserManagementStack(app,`${StackPrefix}usermanagement-stack`,{
