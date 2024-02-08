@@ -1,0 +1,6 @@
+// First time
+npm install
+
+Step 2: Change which dyanamodb table name to target in script1.js file (userManagementTable)
+Step 3: Run the below command
+node ./script1.js ap-south-1 AKIATCKARJ36USZX6SPV 0DeZq0hjvQDcEuafQQoUZMGWvj5D0dh/b4b+pNMd ap-south-1_cOWZZjlWw
