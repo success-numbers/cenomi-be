@@ -29,7 +29,7 @@ function executeCommand(command) {
   });
 }
 // Name of the Table for UserManagement
-const userManagementTable = "Cenomi-Integration-UAT-User-Management";
+const userManagementTable = "Cenomi-Integration-PROD-User-Management";
 
 // Create DynamoDB document client
 var docClient = new AWS.DynamoDB.DocumentClient();
