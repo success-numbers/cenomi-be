@@ -109,19 +109,19 @@
         "http://localhost:3000"
       ]
     },
-    "uat-config": {
+    "prod-config": {
       "project": {
         "projectName": "Cenomi-Integration",
-        "projectEnvironment": "UAT",
+        "projectEnvironment": "PROD",
         "projectVersion": "0.0.1"
       },
       "env": {
         "account": "211125620477",
-        "region": "ap-south-1"
+        "region": "eu-west-1"
       },
       "attributes": {
         "masterApiGateway": {
-          "stageName": "uat",
+          "stageName": "prod",
           "masterGatewayName": "Cenomi-BE",
           "exportApiId": "Master-Api-Id",
           "exportResourceId": "Master-Resource-Id"
