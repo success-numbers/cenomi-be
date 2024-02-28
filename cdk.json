@@ -157,7 +157,6 @@
         "role_1": "role/lambda-inditex-role"
       },
       "allowCrossOrigins": [
-        "https://sit.dtayipqfoagnk.amplifyapp.com",
         "https://prod.d2k0sy1bxqe9uk.amplifyapp.com",
         "http://localhost:3000"
       ]
