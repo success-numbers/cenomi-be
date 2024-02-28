@@ -97,11 +97,11 @@ populateOperations().then((data) => {
   console.log("Script populateOperations Processing Completed");
 });
 
-populateRoles().then((data) => {
-  console.log("Script populateRoles Processing Completed");
-});
+// populateRoles().then((data) => {
+//   console.log("Script populateRoles Processing Completed");
+// });
 
-createNewUser().then((data) => {
-  console.log("Script createNewAdminUser Processing Completed with Username: admin & Password: Welcome@2024 ");
+// createNewUser().then((data) => {
+//   console.log("Script createNewAdminUser Processing Completed with Username: admin & Password: Welcome@2024 ");
 
-})
+// })
