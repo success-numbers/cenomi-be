@@ -2,6 +2,8 @@
 
 const operations = require("./operations");
 const roles = require("./roles");
+const lov = require("./lov");
+
 const { exec } = require('child_process');
 
 const AWS = require("aws-sdk");
@@ -30,6 +32,7 @@ function executeCommand(command) {
 }
 // Name of the Table for UserManagement
 const userManagementTable = "Cenomi-Integration-PROD-User-Management";
+const configTable = "Cenomi-Integration-PROD-Config";
 
 // Create DynamoDB document client
 var docClient = new AWS.DynamoDB.DocumentClient();
@@ -51,6 +54,31 @@ const populateOperations = async () => {
       failedUpdateList.push(pkSkDataObj);
     }
     console.log(`Successfully Updated Operations PK:${pkSkDataObj.PK} SK:${pkSkDataObj.SK}`);
+  }
+  if(failedUpdateList.length == 0){
+    console.log("ALL ITEMS Processed");
+  }else{
+    console.log("FAILED ITEMS", JSON.stringify(failedUpdateList));
+  }
+};
+
+const populateLov = async () => {
+  const failedUpdateList = [];
+  for (let pkSkIndex = 0; pkSkIndex < lov.length; pkSkIndex++) {
+    let pkSkDataObj = lov[pkSkIndex];
+    try {
+      const putItemParams = {
+        TableName: configTable,
+        Item: {
+          ...pkSkDataObj
+        },
+      };
+      await docClient.put(putItemParams).promise();
+    } catch (err) {
+      console.log("Error:", err);
+      failedUpdateList.push(pkSkDataObj);
+    }
+    console.log(`Successfully Updated Lov PK:${pkSkDataObj.PK} SK:${pkSkDataObj.SK}`);
   }
   if(failedUpdateList.length == 0){
     console.log("ALL ITEMS Processed");
@@ -93,8 +121,11 @@ const createNewUser = async () => {
     console.error('Error executing commands:', error);
   }
 }
-populateOperations().then((data) => {
-  console.log("Script populateOperations Processing Completed");
+// populateOperations().then((data) => {
+//   console.log("Script populateOperations Processing Completed");
+// });
+populateLov().then((data) => {
+  console.log("Script populateLov Processing Completed");
 });
 
 // populateRoles().then((data) => {
