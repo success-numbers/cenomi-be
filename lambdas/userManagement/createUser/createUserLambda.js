@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const pattern = /^[a-zA-Z0-9]*$/;
+  const pattern = /^[a-zA-Z0-9 _-]*$/;
   if (!pattern.test(userId)) {
       return {
           statusCode: 400,
